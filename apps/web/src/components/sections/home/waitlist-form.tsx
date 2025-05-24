@@ -30,20 +30,38 @@ function useWaitlistCount() {
 
   const { mutate } = useMutation(
     trpc.earlyAccess.joinWaitlist.mutationOptions({
-      onSuccess: () => {
-        setSuccess(true);
+      onMutate: async () => {
+        await queryClient.cancelQueries({
+          queryKey: trpc.earlyAccess.getWaitlistCount.queryKey(),
+        });
+
+        const previousCount = queryClient.getQueryData([
+          trpc.earlyAccess.getWaitlistCount.queryKey(),
+        ]);
 
         queryClient.setQueryData(
           [trpc.earlyAccess.getWaitlistCount.queryKey()],
-          {
-            count: (query.data?.count ?? 0) + 1,
-          },
+          { count: (query.data?.count ?? 0) + 1 }
         );
+
+        return { previousCount };
       },
-      onError: () => {
+      onSuccess: () => {
+        setSuccess(true);
+      },
+      onError: (err, newTodo, context) => {
+        queryClient.setQueryData(
+          [trpc.earlyAccess.getWaitlistCount.queryKey()],
+          context?.previousCount
+        );
         toast.error("Something went wrong. Please try again.");
       },
-    }),
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.earlyAccess.getWaitlistCount.queryKey(),
+        });
+      },
+    })
   );
 
   return { count: query.data?.count ?? 0, mutate, success };
@@ -71,7 +89,7 @@ export function WaitlistForm({ className }: WaitlistFormProps) {
     <div
       className={cn(
         "flex flex-col gap-6 items-center justify-center w-full max-w-3xl mx-auto",
-        className,
+        className
       )}
     >
       {waitlist.success ? (
