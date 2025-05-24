@@ -123,4 +123,27 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* tiptap editor */
+
+  .event-editor-content {
+    @apply overflow-hidden w-full;
+
+    /* prose mirror */
+    .ProseMirror {
+      @apply outline-none w-full min-w-max;
+    }
+
+    .mention {
+      @apply px-1 py-0.5 rounded-sm text-sm font-medium mr-0.5;
+
+      &[data-id="mention-time"] {
+        @apply bg-blue-500/10 text-blue-500;
+      }
+
+      &[data-id="mention-duration"] {
+        @apply bg-orange-500/10 text-orange-500;
+      }
+    }
+  }
 }

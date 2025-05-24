@@ -12,11 +12,15 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { CreateEventInput } from "./create-event-input";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
-      <SidebarHeader className="border-sidebar-border h-16 border-b" />
+      <SidebarHeader className="border-sidebar-border h-16 border-b justify-center">
+        <CreateEventInput />
+      </SidebarHeader>
+
       <SidebarContent>
         <DatePicker />
         <SidebarSeparator className="mx-0" />
