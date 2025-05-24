@@ -323,6 +323,24 @@ export function CalendarDndProvider({
     }
   };
 
+  // Handle drag cancel (e.g., when ESC key is pressed)
+  const handleDragCancel = () => {
+    try {
+    } catch (error) {
+      console.error("Error in drag cancel handler:", error);
+    } finally {
+      // Reset state
+      setActiveEvent(null);
+      setActiveId(null);
+      setActiveView(null);
+      setCurrentTime(null);
+      setEventHeight(null);
+      setIsMultiDay(false);
+      setMultiDayWidth(null);
+      setDragHandlePosition(null);
+    }
+  };
+
   return (
     <DndContext
       id={dndContextId}
@@ -330,6 +348,7 @@ export function CalendarDndProvider({
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
     >
       <CalendarDndContext.Provider
         value={{
