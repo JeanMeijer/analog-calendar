@@ -6,7 +6,7 @@ import { addDays, format, isToday } from "date-fns";
 
 import {
   AgendaDaysToShow,
-  CalendarEvent,
+  type CalendarEvent,
   EventItem,
   getAgendaEventsForDay,
 } from "@/components/event-calendar";

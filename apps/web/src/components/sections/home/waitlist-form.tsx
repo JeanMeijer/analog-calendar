@@ -30,20 +30,22 @@ function useWaitlistCount() {
 
   const { mutate } = useMutation(
     trpc.earlyAccess.joinWaitlist.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (data) => {
         setSuccess(true);
+
+        toast.success(data.message);
 
         queryClient.setQueryData(
           [trpc.earlyAccess.getWaitlistCount.queryKey()],
           {
             count: (query.data?.count ?? 0) + 1,
-          },
+          }
         );
       },
       onError: () => {
         toast.error("Something went wrong. Please try again.");
       },
-    }),
+    })
   );
 
   return { count: query.data?.count ?? 0, mutate, success };
@@ -71,7 +73,7 @@ export function WaitlistForm({ className }: WaitlistFormProps) {
     <div
       className={cn(
         "flex flex-col gap-6 items-center justify-center w-full max-w-3xl mx-auto",
-        className,
+        className
       )}
     >
       {waitlist.success ? (

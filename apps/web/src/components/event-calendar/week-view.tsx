@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo } from "react";
+import type React from "react";
+import { useMemo } from "react";
 import {
   addHours,
   areIntervalsOverlapping,
@@ -361,8 +362,8 @@ export function WeekView({
                 style={{ top: `${currentTimePosition}%` }}
               >
                 <div className="relative flex items-center">
-                  <div className="bg-primary absolute -left-1 h-2 w-2 rounded-full"></div>
-                  <div className="bg-primary h-[2px] w-full"></div>
+                  <div className="bg-primary absolute -left-1 h-2 w-2 rounded-full"/>
+                  <div className="bg-primary h-[2px] w-full"/>
                 </div>
               </div>
             )}

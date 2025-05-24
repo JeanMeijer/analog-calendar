@@ -3,7 +3,7 @@ import { cache, type ReactNode } from "react";
 import { headers } from "next/headers";
 import {
   createTRPCOptionsProxy,
-  TRPCQueryOptions,
+  type TRPCQueryOptions,
 } from "@trpc/tanstack-react-query";
 import { appRouter, createContext } from "@repo/api";
 import { makeQueryClient } from "./query-client";
