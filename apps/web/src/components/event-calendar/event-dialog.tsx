@@ -73,8 +73,8 @@ export function EventDialog({
       setTitle(event.title || "");
       setDescription(event.description || "");
 
-      const start = new Date(event.start);
-      const end = new Date(event.end);
+      const start = new Date(event.start.dateTime);
+      const end = new Date(event.end.dateTime);
 
       setStartDate(start);
       setEndDate(end);
@@ -167,8 +167,8 @@ export function EventDialog({
       id: event?.id || "",
       title: eventTitle,
       description,
-      start,
-      end,
+      start: { dateTime: start.toISOString(), timeZone: "UTC" },
+      end: { dateTime: end.toISOString(), timeZone: "UTC" },
       allDay,
       location,
       color,

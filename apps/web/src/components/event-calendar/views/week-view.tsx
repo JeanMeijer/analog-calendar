@@ -200,8 +200,8 @@ function WeekViewAllDaySection() {
         {allDays.map((day, dayIndex) => {
           const isDayVisible = viewPreferences.showWeekends || !isWeekend(day);
           const dayAllDayEvents = allDayEvents.filter((event) => {
-            const eventStart = new Date(event.start);
-            const eventEnd = new Date(event.end);
+            const eventStart = new Date(event.start.dateTime);
+            const eventEnd = new Date(event.end.dateTime);
             return (
               isSameDay(day, eventStart) ||
               (day > eventStart && day < eventEnd) ||
@@ -220,8 +220,8 @@ function WeekViewAllDaySection() {
               style={{ visibility: isDayVisible ? "visible" : "hidden" }}
             >
               {dayAllDayEvents.map((event) => {
-                const eventStart = new Date(event.start);
-                const eventEnd = new Date(event.end);
+                const eventStart = new Date(event.start.dateTime);
+                const eventEnd = new Date(event.end.dateTime);
                 const isFirstDay = isSameDay(day, eventStart);
                 const isLastDay = isSameDay(day, eventEnd);
                 const isFirstVisibleDay =

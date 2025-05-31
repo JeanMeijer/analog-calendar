@@ -1,38 +1,22 @@
-import { TRPCError } from "@trpc/server";
-
-import { auth } from "@repo/auth/server";
-
-import { GoogleCalendarProvider } from "../providers/google-calendar";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { calendarProcedure, createTRPCRouter } from "../trpc";
 
 export const calendarsRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({ ctx }) => {
-    const { accessToken } = await auth.api.getAccessToken({
-      body: {
-        providerId: "google",
-      },
-      headers: ctx.headers,
-    });
+  list: calendarProcedure.query(async ({ ctx }) => {
+    const accounts = await Promise.all(
+      ctx.allCalendarClients.map(async ({ client, connection }) => {
+        const calendars = await client.calendars();
 
-    if (!accessToken) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-
-    const client = new GoogleCalendarProvider({
-      accessToken,
-    });
-
-    const calendars = await client.calendars();
+        return {
+          id: connection.id,
+          provider: connection.providerId,
+          name: connection.email,
+          calendars,
+        };
+      }),
+    );
 
     return {
-      accounts: [
-        {
-          id: "1",
-          provider: "google",
-          name: ctx.user.email,
-          calendars,
-        },
-      ],
+      accounts,
     };
   }),
 });

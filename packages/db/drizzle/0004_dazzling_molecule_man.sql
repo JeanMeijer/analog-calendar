@@ -1,0 +1,2 @@
+ALTER TABLE "connection" ADD COLUMN "account_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "connection" ADD CONSTRAINT "connection_account_id_account_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."account"("id") ON DELETE cascade ON UPDATE no action;

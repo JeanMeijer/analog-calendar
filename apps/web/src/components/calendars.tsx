@@ -47,7 +47,7 @@ export function Calendars() {
   }
 
   return (
-    <>
+    <div className="relative flex scrollbar-hidden flex-1 flex-col gap-2 overflow-auto">
       {data.accounts.map((account, index) => (
         <Fragment key={account.name}>
           <SidebarGroup key={account.name} className="py-0">
@@ -70,7 +70,7 @@ export function Calendars() {
           <SidebarSeparator className="mx-0" />
         </Fragment>
       ))}
-    </>
+    </div>
   );
 }
 

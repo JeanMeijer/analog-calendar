@@ -1,0 +1,2 @@
+ALTER TABLE "connection" DROP CONSTRAINT "connection_userId_email_unique";--> statement-breakpoint
+ALTER TABLE "connection" ADD CONSTRAINT "connection_userId_email_providerId_unique" UNIQUE("user_id","email","provider_id");

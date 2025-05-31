@@ -1,14 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { auth } from "@repo/auth/server";
-
-import { GoogleCalendarProvider } from "../providers/google-calendar";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { dateHelpers } from "../utils/date-helpers";
+import { dateInputSchema } from "../providers/validations";
+import { calendarProcedure, createTRPCRouter } from "../trpc";
 
 export const eventsRouter = createTRPCRouter({
-  list: protectedProcedure
+  list: calendarProcedure
     .input(
       z.object({
         calendarIds: z.array(z.string()).default([]),
@@ -17,159 +14,166 @@ export const eventsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { accessToken } = await auth.api.getAccessToken({
-        body: {
-          providerId: "google",
-        },
-        headers: ctx.headers,
-      });
-
-      if (!accessToken) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-
-      const client = new GoogleCalendarProvider({
-        accessToken,
-      });
-
-      let calendarIds = input.calendarIds;
-
-      if (calendarIds.length === 0) {
-        const calendars = await client.calendars();
-
-        calendarIds = calendars
-          .filter(
-            (cal) =>
-              cal.primary || cal.id?.includes("@group.calendar.google.com"),
-          )
-          .map((cal) => cal.id)
-          .filter(Boolean);
-      }
-
       const allEvents = await Promise.all(
-        calendarIds.map(async (calendarId) => {
-          try {
-            const events = await client.events(
-              calendarId,
-              input.timeMin,
-              input.timeMax,
-            );
-            return events.map((event) => ({ ...event, calendarId }));
-          } catch (error) {
-            console.error(
-              `Failed to fetch events for calendar ${calendarId}:`,
-              error,
-            );
-            return [];
+        ctx.allCalendarClients.map(async ({ client, connection }) => {
+          let calendarIds = input.calendarIds;
+
+          if (calendarIds.length === 0) {
+            try {
+              const calendars = await client.calendars();
+              calendarIds = calendars
+                // .filter(
+                //   (cal) =>
+                //     cal.primary || cal.id?.includes("@group.calendar.google.com"),
+                // )
+                .map((cal) => cal.id)
+                .filter(Boolean);
+            } catch (error) {
+              console.error(
+                `Failed to fetch calendars for provider ${connection.providerId}:`,
+                error,
+              );
+              return [];
+            }
           }
+
+          const providerEvents = await Promise.all(
+            calendarIds.map(async (calendarId) => {
+              try {
+                const events = await client.events(
+                  calendarId,
+                  input.timeMin,
+                  input.timeMax,
+                );
+
+                return events.map((event) => ({
+                  ...event,
+                  calendarId,
+                  providerId: connection.providerId,
+                  accountId: connection.id,
+                  accountName: connection.email,
+                  connectionId: connection.id,
+                }));
+              } catch (error) {
+                console.error(
+                  `Failed to fetch events for calendar ${calendarId} from ${connection.providerId}:`,
+                  error,
+                );
+                return [];
+              }
+            }),
+          );
+
+          return providerEvents.flat();
         }),
       );
 
       const events = allEvents
         .flat()
         .sort(
-          (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
+          (a, b) =>
+            new Date(a.start.dateTime).getTime() -
+            new Date(b.start.dateTime).getTime(),
         );
 
       return { events };
     }),
 
-  create: protectedProcedure
+  create: calendarProcedure
     .input(
       z.object({
+        connectionId: z.string(),
         calendarId: z.string(),
         title: z.string(),
-        start: z.string(),
-        end: z.string(),
+        start: dateInputSchema,
+        end: dateInputSchema,
         allDay: z.boolean().optional(),
         description: z.string().optional(),
         location: z.string().optional(),
+        color: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { accessToken } = await auth.api.getAccessToken({
-        body: {
-          providerId: "google",
-        },
-        headers: ctx.headers,
-      });
+      const calendarClient = ctx.allCalendarClients.find(
+        ({ connection }) => connection.id === input.connectionId,
+      );
 
-      if (!accessToken) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (!calendarClient) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Calendar client not found for connectionId: ${input.connectionId}`,
+        });
       }
 
-      const client = new GoogleCalendarProvider({
-        accessToken,
-      });
+      const { connectionId, ...eventData } = input;
 
-      const googleParams = dateHelpers.prepareGoogleParams(input);
-      const event = await client.createEvent(input.calendarId, googleParams);
-      return { event };
-    }),
-
-  update: protectedProcedure
-    .input(
-      z.object({
-        calendarId: z.string(),
-        eventId: z.string(),
-        title: z.string().optional(),
-        start: z.string().optional(),
-        end: z.string().optional(),
-        allDay: z.boolean().optional(),
-        description: z.string().optional(),
-        location: z.string().optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { accessToken } = await auth.api.getAccessToken({
-        body: {
-          providerId: "google",
-        },
-        headers: ctx.headers,
-      });
-
-      if (!accessToken) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-
-      const client = new GoogleCalendarProvider({
-        accessToken,
-      });
-
-      const googleParams = dateHelpers.prepareGoogleParams(input);
-      const event = await client.updateEvent(
-        input.calendarId,
-        input.eventId,
-        googleParams,
+      const event = await calendarClient.client.createEvent(
+        eventData.calendarId,
+        eventData,
       );
 
       return { event };
     }),
 
-  delete: protectedProcedure
+  update: calendarProcedure
     .input(
       z.object({
+        connectionId: z.string(),
+        calendarId: z.string(),
+        eventId: z.string(),
+        title: z.string().optional(),
+        start: dateInputSchema.optional(),
+        end: dateInputSchema.optional(),
+        allDay: z.boolean().optional(),
+        description: z.string().optional(),
+        location: z.string().optional(),
+        color: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const calendarClient = ctx.allCalendarClients.find(
+        ({ connection }) => connection.id === input.connectionId,
+      );
+
+      if (!calendarClient?.client) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Calendar client not found for connectionId: ${input.connectionId}`,
+        });
+      }
+
+      const { connectionId, calendarId, eventId, ...updateData } = input;
+
+      const event = await calendarClient.client.updateEvent(
+        calendarId,
+        eventId,
+        updateData,
+      );
+
+      return { event };
+    }),
+
+  delete: calendarProcedure
+    .input(
+      z.object({
+        connectionId: z.string(),
         calendarId: z.string(),
         eventId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { accessToken } = await auth.api.getAccessToken({
-        body: {
-          providerId: "google",
-        },
-        headers: ctx.headers,
-      });
+      const calendarClient = ctx.allCalendarClients.find(
+        ({ connection }) => connection.id === input.connectionId,
+      );
 
-      if (!accessToken) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (!calendarClient?.client) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Calendar client not found for connectionId: ${input.connectionId}`,
+        });
       }
 
-      const client = new GoogleCalendarProvider({
-        accessToken,
-      });
-
-      await client.deleteEvent(input.calendarId, input.eventId);
+      await calendarClient.client.deleteEvent(input.calendarId, input.eventId);
       return { success: true };
     }),
 });

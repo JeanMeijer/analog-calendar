@@ -15,6 +15,27 @@
       "when": 1747885862700,
       "tag": "0001_amusing_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1748550757693,
+      "tag": "0002_lovely_groot",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1748604058018,
+      "tag": "0003_thin_dreadnoughts",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1748608788540,
+      "tag": "0004_dazzling_molecule_man",
+      "breakpoints": true
     }
   ]
 }

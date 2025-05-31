@@ -108,8 +108,8 @@ export function EventsPopup({
           <div className="py-2 text-sm text-muted-foreground">No events</div>
         ) : (
           events.map((event) => {
-            const eventStart = new Date(event.start);
-            const eventEnd = new Date(event.end);
+            const eventStart = new Date(event.start.dateTime);
+            const eventEnd = new Date(event.end.dateTime);
             const isFirstDay = isSameDay(date, eventStart);
             const isLastDay = isSameDay(date, eventEnd);
 

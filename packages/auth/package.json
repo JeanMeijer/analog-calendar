@@ -14,10 +14,14 @@
     "server-only": "^0.0.1"
   },
   "dependencies": {
+    "@googleapis/people": "^3.0.9",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "@repo/db": "workspace:*",
-    "@repo/env": "workspace:*"
+    "@repo/env": "workspace:*",
+    "google-auth-library": "^9.15.1"
   },
   "devDependencies": {
+    "@microsoft/microsoft-graph-types": "^2.40.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^20",

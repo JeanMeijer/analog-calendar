@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, ChevronsUpDown, LogOut, Moon, Sun } from "lucide-react";
+import { ChevronsUpDown, LogOut, Moon, Plus, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { authClient } from "@repo/auth/client";
 
+import { AddAccountDialog } from "@/components/add-account-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -30,10 +31,12 @@ function useUser() {
 }
 
 export function NavUser() {
-  const { data: user } = useUser();
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const { data: user } = useUser();
   const { theme, setTheme } = useTheme();
+
   const toggleTheme = () => {
     if (theme === "dark") {
       setTheme("light");
@@ -41,6 +44,7 @@ export function NavUser() {
       setTheme("dark");
     }
   };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -89,10 +93,12 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
+              <AddAccountDialog>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <Plus />
+                  Add account
+                </DropdownMenuItem>
+              </AddAccountDialog>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem

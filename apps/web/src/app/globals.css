@@ -125,6 +125,12 @@
   }
 }
 
+@utility scrollbar-hidden {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);

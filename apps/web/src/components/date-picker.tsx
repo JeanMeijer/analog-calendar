@@ -36,7 +36,7 @@ export function DatePicker() {
   const isWeekView = view === "week";
 
   return (
-    <SidebarGroup className="px-0">
+    <SidebarGroup className="sticky top-0 px-0">
       <SidebarGroupContent>
         <Calendar
           animate

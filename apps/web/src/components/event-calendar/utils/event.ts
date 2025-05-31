@@ -16,8 +16,8 @@ import type { CalendarEvent } from "../types";
 
 export function getEventDates(event: CalendarEvent) {
   return {
-    start: new Date(event.start),
-    end: new Date(event.end),
+    start: new Date(event.start.dateTime),
+    end: new Date(event.end.dateTime),
   };
 }
 
@@ -72,10 +72,14 @@ export function getEventsStartingOnDay(
 ): CalendarEvent[] {
   return events
     .filter((event) => {
-      const eventStart = new Date(event.start);
+      const eventStart = new Date(event.start.dateTime);
       return isSameDay(day, eventStart);
     })
-    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+    .sort(
+      (a, b) =>
+        new Date(a.start.dateTime).getTime() -
+        new Date(b.start.dateTime).getTime(),
+    );
 }
 
 export function getSpanningEventsForDay(
@@ -85,8 +89,8 @@ export function getSpanningEventsForDay(
   return events.filter((event) => {
     if (!isMultiDayEvent(event)) return false;
 
-    const eventStart = new Date(event.start);
-    const eventEnd = new Date(event.end);
+    const eventStart = new Date(event.start.dateTime);
+    const eventEnd = new Date(event.end.dateTime);
 
     return (
       !isSameDay(day, eventStart) &&

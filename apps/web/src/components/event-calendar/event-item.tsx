@@ -54,9 +54,10 @@ function EventWrapper({
   const displayEnd = currentTime
     ? new Date(
         new Date(currentTime).getTime() +
-          (new Date(event.end).getTime() - new Date(event.start).getTime()),
+          (new Date(event.end.dateTime).getTime() -
+            new Date(event.start.dateTime).getTime()),
       )
-    : new Date(event.end);
+    : new Date(event.end.dateTime);
 
   const isEventInPast = isPast(displayEnd);
 
@@ -118,16 +119,17 @@ export function EventItem({
 
   // Use the provided currentTime (for dragging) or the event's actual time
   const displayStart = useMemo(() => {
-    return currentTime || new Date(event.start);
+    return currentTime || new Date(event.start.dateTime);
   }, [currentTime, event.start]);
 
   const displayEnd = useMemo(() => {
     return currentTime
       ? new Date(
           new Date(currentTime).getTime() +
-            (new Date(event.end).getTime() - new Date(event.start).getTime()),
+            (new Date(event.end.dateTime).getTime() -
+              new Date(event.start.dateTime).getTime()),
         )
-      : new Date(event.end);
+      : new Date(event.end.dateTime);
   }, [currentTime, event.start, event.end]);
 
   // Calculate event duration in minutes
@@ -230,7 +232,7 @@ export function EventItem({
         getEventColorClasses(eventColor),
         className,
       )}
-      data-past-event={isPast(new Date(event.end)) || undefined}
+      data-past-event={isPast(new Date(event.end.dateTime)) || undefined}
       onClick={onClick}
       onMouseDown={onMouseDown}
       onTouchStart={onTouchStart}
