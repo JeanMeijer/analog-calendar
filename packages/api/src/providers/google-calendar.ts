@@ -8,11 +8,16 @@ interface GoogleCalendarProviderOptions {
   accessToken: string;
 }
 
+interface DateTimeWithZone {
+  dateTime: string;
+  timeZone: string;
+}
+
 interface CreateEventInput {
-  title: string;
+  summary: string;
   description?: string;
-  start: Date;
-  end: Date;
+  start: DateTimeWithZone;
+  end: DateTimeWithZone;
   allDay?: boolean;
   location?: string;
   colorId?: string;
@@ -37,10 +42,12 @@ interface EventCreateParams {
   start?: {
     date?: string;
     dateTime?: string;
+    timeZone?: string;
   };
   end?: {
     date?: string;
     dateTime?: string;
+    timeZone?: string;
   };
 }
 
@@ -92,16 +99,16 @@ export class GoogleCalendarProvider {
 
   async createEvent(calendarId: string, event: CreateEventInput) {
     const eventData: EventCreateParams = {
-      summary: event.title,
+      summary: event.summary,
       description: event.description,
       location: event.location,
       colorId: event.colorId,
       start: event.allDay
-        ? { date: event.start.toISOString().split("T")[0] }
-        : { dateTime: event.start.toISOString() },
+        ? { date: event.start.dateTime.split("T")[0] }
+        : { dateTime: event.start.dateTime, timeZone: event.start.timeZone },
       end: event.allDay
-        ? { date: event.end.toISOString().split("T")[0] }
-        : { dateTime: event.end.toISOString() },
+        ? { date: event.end.dateTime.split("T")[0] }
+        : { dateTime: event.end.dateTime, timeZone: event.end.timeZone },
     };
 
     const createdEvent = await this.client.calendars.events.create(
