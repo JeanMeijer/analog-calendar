@@ -62,6 +62,17 @@ export interface ResponseToEventInput {
 
 export type AttendeeStatus = Attendee["status"];
 
+export interface FreeBusySlot {
+  start: Temporal.ZonedDateTime;
+  end: Temporal.ZonedDateTime;
+  status?: string;
+}
+
+export interface CalendarFreeBusy {
+  calendarId: string;
+  busy: FreeBusySlot[];
+}
+
 export interface CalendarProvider {
   providerId: "google" | "microsoft";
   calendars(): Promise<Calendar[]>;
@@ -94,6 +105,11 @@ export interface CalendarProvider {
     eventId: string,
     response: ResponseToEventInput,
   ): Promise<void>;
+  freeBusy(
+    calendarIds: string[],
+    timeMin: Temporal.ZonedDateTime,
+    timeMax: Temporal.ZonedDateTime,
+  ): Promise<CalendarFreeBusy[]>;
 }
 
 export interface ConferencingProvider {

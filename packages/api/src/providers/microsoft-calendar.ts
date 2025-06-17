@@ -2,6 +2,7 @@ import { Client } from "@microsoft/microsoft-graph-client";
 import type {
   Calendar as MicrosoftCalendar,
   Event as MicrosoftEvent,
+  ScheduleInformation,
 } from "@microsoft/microsoft-graph-types";
 import { Temporal } from "temporal-polyfill";
 
@@ -12,6 +13,7 @@ import { assignColor } from "./colors";
 import type {
   Calendar,
   CalendarEvent,
+  CalendarFreeBusy,
   CalendarProvider,
   ResponseToEventInput,
 } from "./interfaces";
@@ -20,6 +22,8 @@ import {
   eventResponseStatusPath,
   parseMicrosoftCalendar,
   parseMicrosoftEvent,
+  parseScheduleItem,
+  toMicrosoftDate,
   toMicrosoftEvent,
 } from "./microsoft-calendar/utils";
 import { ProviderError } from "./utils";
@@ -206,6 +210,59 @@ export class MicrosoftCalendarProvider implements CalendarProvider {
         )
         .post({ comment: response.comment, sendResponse: response.sendUpdate });
     });
+  }
+
+  async getSchedule(
+    schedules: string[],
+    startTime: Temporal.ZonedDateTime,
+    endTime: Temporal.ZonedDateTime,
+    availabilityViewInterval = 30,
+  ): Promise<
+    Array<{
+      scheduleId: string;
+      items: Array<{
+        start: Temporal.ZonedDateTime;
+        end: Temporal.ZonedDateTime;
+        status: string;
+      }>;
+    }>
+  > {
+    return this.withErrorHandler("getSchedule", async () => {
+      const body = {
+        schedules,
+        startTime: toMicrosoftDate({ value: startTime }),
+        endTime: toMicrosoftDate({ value: endTime }),
+        availabilityViewInterval,
+      };
+
+      const response = await this.graphClient
+        .api("/me/calendar/getSchedule")
+        .post(body);
+
+      const data = response.value as ScheduleInformation[];
+
+      return data.map((info) => ({
+        scheduleId: info.scheduleId ?? "",
+        items: info.scheduleItems?.map(parseScheduleItem) ?? [],
+      }));
+    });
+  }
+
+  async freeBusy(
+    calendars: string[],
+    timeMin: Temporal.ZonedDateTime,
+    timeMax: Temporal.ZonedDateTime,
+  ): Promise<CalendarFreeBusy[]> {
+    const schedules = await this.getSchedule(calendars, timeMin, timeMax);
+
+    return schedules.map((schedule) => ({
+      calendarId: schedule.scheduleId,
+      busy: schedule.items.map((item) => ({
+        start: item.start,
+        end: item.end,
+        status: item.status,
+      })),
+    }));
   }
 
   private async withErrorHandler<T>(
