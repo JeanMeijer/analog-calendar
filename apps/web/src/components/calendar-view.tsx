@@ -278,6 +278,7 @@ export function CalendarView({ className }: CalendarViewProps) {
       start: event.start,
       end: event.end,
       allDay: event.allDay,
+      recurrence: event.recurrence,
       description: event.description,
       location: event.location,
     });

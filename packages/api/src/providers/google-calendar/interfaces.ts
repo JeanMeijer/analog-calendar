@@ -28,3 +28,7 @@ export type DateTimeGoogleCalendarEvent = GoogleCalendarEvent & {
   start: GoogleCalendarDateTime;
   end: GoogleCalendarDateTime;
 };
+
+export type GoogleCalendarRecurrentEvent = GoogleCalendarEvent & {
+  recurrence: string;
+}

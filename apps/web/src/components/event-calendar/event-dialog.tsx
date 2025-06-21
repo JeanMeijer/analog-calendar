@@ -76,11 +76,21 @@ export function EventDialog({
   const [startTime, setStartTime] = useState(`${DefaultStartHour}:00`);
   const [endTime, setEndTime] = useState(`${DefaultEndHour}:00`);
   const [allDay, setAllDay] = useState(false);
+  const [recurrenceFrequency, setRecurrenceFrequency] =
+    useState<"once" | "daily" | "weekly" | "monthly" | "yearly">("once");
+  const [recurrenceInterval, setRecurrenceInterval] = useState(0);
+  const [recurrenceIntervalType, setRecurrenceIntervalType] =
+    useState<"day" | "week" | "month" | "year">("day");
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | null>(
+    null,
+  );
   const [location, setLocation] = useState("");
   const [color, setColor] = useState<EventColor>("sky");
   const [error, setError] = useState<string | null>(null);
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
+  const [recurrenceEndDateOpen, setRecurrenceEndDateOpen] =
+    useState(false);
 
   const defaultAccount = useDefaultAccount();
   const settings = useCalendarSettings();
@@ -98,12 +108,19 @@ export function EventDialog({
         value: event.end,
         timeZone: settings.defaultTimeZone,
       });
-
+      const recurrenceEnd = event.recurrence !== undefined ? toDate({
+        value: event.recurrence?.until!,
+        timeZone: settings.defaultTimeZone,
+      }): null;
+      
       setStartDate(start);
       setEndDate(end);
       setStartTime(formatTimeForInput(start));
       setEndTime(formatTimeForInput(end));
       setAllDay(event.allDay || false);
+      setRecurrenceFrequency(event.recurrence?.frequency || "once");
+      setRecurrenceInterval(event.recurrence?.interval || 0);
+      setRecurrenceEndDate(recurrenceEnd);
       setLocation(event.location || "");
       setColor((event.color as EventColor) || "sky");
       setError(null); // Reset error when opening dialog
@@ -151,6 +168,7 @@ export function EventDialog({
   const handleSave = () => {
     const start = new Date(startDate);
     const end = new Date(endDate);
+    const recurrenceEnd = recurrenceEndDate !== null ? new Date(recurrenceEndDate) : null;
 
     if (!allDay) {
       const [startHours = 0, startMinutes = 0] = startTime
@@ -206,6 +224,17 @@ export function EventDialog({
             (event?.end as Temporal.ZonedDateTime).timeZoneId,
           ),
       allDay,
+      recurrence: recurrenceFrequency !== "once"
+        ? {
+            frequency: recurrenceFrequency,
+            interval: recurrenceInterval,
+            until: recurrenceEnd
+              ? Temporal.Instant.from(recurrenceEnd.toISOString()).toZonedDateTimeISO(
+                  (event?.start as Temporal.ZonedDateTime).timeZoneId,
+                )
+              : undefined,
+          }
+        : undefined,
       location,
       color,
       calendarId: "primary",
@@ -434,6 +463,7 @@ export function EventDialog({
             )}
           </div>
 
+          <div className="flex-1 *:not-first:mt-1.5">
           <div className="flex items-center gap-2">
             <Checkbox
               id="all-day"
@@ -441,6 +471,78 @@ export function EventDialog({
               onCheckedChange={(checked) => setAllDay(checked === true)}
             />
             <Label htmlFor="all-day">All day</Label>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <Label htmlFor="recurrence-frequency">Recurrence</Label>
+            <Select value={recurrenceFrequency} onValueChange={(value) => {
+              setRecurrenceFrequency(value as "once" | "daily" | "weekly" | "monthly" | "yearly");
+              if (value === "once") {
+                setRecurrenceInterval(0);
+                setRecurrenceEndDate(null);
+              } else {
+                setRecurrenceInterval(1);
+                setRecurrenceEndDate(new Date());
+              }
+            }}>
+                  <SelectTrigger id="recurrence-frequency">
+                    <SelectValue placeholder="Once" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["once", "daily", "weekly", "monthly", "yearly"].map((freq) => (
+                      <SelectItem key={freq} value={freq}>
+                        {freq.charAt(0).toUpperCase() + freq.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+            {recurrenceFrequency !== "once" && (
+              <div className="flex-1 *:not-first:mt-1.5">
+              <Label htmlFor="end-date">Repeat until</Label>
+              <Popover open={recurrenceEndDateOpen} onOpenChange={setRecurrenceEndDateOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="end-date"
+                    variant={"outline"}
+                    className={cn(
+                      "group w-full justify-between border-input bg-background px-3 font-normal outline-offset-0 outline-none hover:bg-background focus-visible:outline-[3px]",
+                      !recurrenceEndDate && "text-muted-foreground",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "truncate",
+                        !recurrenceEndDate && "text-muted-foreground",
+                      )}
+                    >
+                      {recurrenceEndDate ? format(recurrenceEndDate, "PPP") : "Pick a date"}
+                    </span>
+                    <RiCalendarLine
+                      size={16}
+                      className="shrink-0 text-muted-foreground/80"
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={recurrenceEndDate!}
+                    defaultMonth={recurrenceEndDate!}
+                    disabled={{ before: startDate }}
+                    onSelect={(date) => {
+                      if (date) {
+                        setRecurrenceEndDate(date);
+                        setError(null);
+                        setRecurrenceEndDateOpen(false);
+                      }
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            )}
+          </div>
           </div>
 
           <div className="*:not-first:mt-1.5">

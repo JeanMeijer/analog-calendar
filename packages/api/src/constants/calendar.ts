@@ -20,5 +20,6 @@ export const colorMap = {
   "11": "rose",
 } as const;
 
+
 export type EventColorId = keyof typeof colorMap;
 export type EventColor = (typeof colorMap)[EventColorId];
