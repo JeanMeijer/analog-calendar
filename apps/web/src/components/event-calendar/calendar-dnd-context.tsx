@@ -25,8 +25,8 @@ import { Temporal } from "temporal-polyfill";
 
 import { compareTemporal, toDate } from "@repo/temporal";
 
+import { useCalendarSettings } from "@/atoms";
 import { EventItem, type CalendarEvent } from "@/components/event-calendar";
-import { useCalendarSettings } from "./hooks/use-calendar-settings";
 
 // Define the context type
 type CalendarDndContextType = {

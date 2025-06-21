@@ -16,6 +16,7 @@ import {
 
 import { toDate } from "@repo/temporal";
 
+import { useCalendarSettings, useViewPreferences } from "@/atoms";
 import {
   DraggableEvent,
   DroppableCell,
@@ -29,7 +30,6 @@ import {
   useEventCollection,
   useEventVisibility,
   useGridLayout,
-  useViewPreferences,
   type EventCollectionForMonth,
 } from "@/components/event-calendar/hooks";
 import {
@@ -46,7 +46,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, groupArrayIntoChunks } from "@/lib/utils";
-import { useCalendarSettings } from "../hooks/use-calendar-settings";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 

@@ -1,4 +1,7 @@
+import { atom, useAtomValue } from "jotai";
 import { atomWithStorage } from "jotai/utils";
+
+import type { CalendarView } from "@/components/event-calendar";
 
 export interface ViewPreferences {
   showWeekends: boolean;
@@ -16,3 +19,16 @@ export const viewPreferencesAtom = atomWithStorage<ViewPreferences>(
     showWeekNumbers: false,
   },
 );
+
+// Store the calendar view preference persistently
+export const calendarViewAtom = atomWithStorage<CalendarView>(
+  "analog-calendar-view",
+  "week",
+);
+
+// Store the current date in memory (non-persistent)
+export const currentDateAtom = atom<Date>(new Date());
+
+export function useViewPreferences() {
+  return useAtomValue(viewPreferencesAtom);
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronsUpDown, LogOut, Plus, UserRound } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -24,18 +24,13 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTRPC } from "@/lib/trpc/client";
-
-function useUser() {
-  const trpc = useTRPC();
-  return useQuery(trpc.user.me.queryOptions());
-}
+import { useCurrentUser } from "@/hooks/accounts";
 
 export function NavUser() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data: user, isLoading } = useUser();
+  const { data: user, isLoading } = useCurrentUser();
   const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {

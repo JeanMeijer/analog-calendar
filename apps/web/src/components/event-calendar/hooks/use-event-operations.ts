@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { CALENDAR_CONFIG } from "../constants";
 import { CalendarEvent } from "../types";
 import {
   generateEventId,
@@ -8,59 +9,60 @@ import {
   showEventMovedToast,
   showEventUpdatedToast,
 } from "../utils";
+import { useCalendarActions } from "./use-calendar-actions";
 
-interface UseEventOperationsProps {
-  events: CalendarEvent[];
-  onEventAdd?: (event: CalendarEvent) => void;
-  onEventUpdate?: (event: CalendarEvent) => void;
-  onEventDelete?: (eventId: string) => void;
-  onOperationComplete: () => void;
-}
+export function useEventOperations(onOperationComplete?: () => void) {
+  const { events, createEvent, updateEvent, deleteEvent } =
+    useCalendarActions();
 
-export function useEventOperations({
-  events,
-  onEventAdd,
-  onEventUpdate,
-  onEventDelete,
-  onOperationComplete,
-}: UseEventOperationsProps) {
   const handleEventSave = useCallback(
     (event: CalendarEvent) => {
       if (event.id) {
-        onEventUpdate?.(event);
+        updateEvent(event);
         showEventUpdatedToast(event);
       } else {
         const eventWithId = { ...event, id: generateEventId() };
-        onEventAdd?.(eventWithId);
+        createEvent({
+          ...eventWithId,
+          calendarId: CALENDAR_CONFIG.DEFAULT_CALENDAR_ID,
+        });
         showEventAddedToast(eventWithId);
       }
-      onOperationComplete();
+      onOperationComplete?.();
     },
-    [onEventAdd, onEventUpdate, onOperationComplete],
+    [createEvent, onOperationComplete, updateEvent],
   );
 
   const handleEventDelete = useCallback(
     (eventId: string) => {
       const deletedEvent = events.find((e) => e.id === eventId);
-      onEventDelete?.(eventId);
-      onOperationComplete();
 
-      if (deletedEvent) {
-        showEventDeletedToast(deletedEvent);
+      if (!deletedEvent) {
+        console.error(`Event with id ${eventId} not found`);
+        return;
       }
+
+      deleteEvent({
+        accountId: deletedEvent.accountId,
+        calendarId: deletedEvent.calendarId,
+        eventId,
+      });
+      showEventDeletedToast(deletedEvent);
+      onOperationComplete?.();
     },
-    [events, onEventDelete, onOperationComplete],
+    [events, deleteEvent, onOperationComplete],
   );
 
   const handleEventMove = useCallback(
     (updatedEvent: CalendarEvent) => {
-      onEventUpdate?.(updatedEvent);
+      updateEvent(updatedEvent);
       showEventMovedToast(updatedEvent);
     },
-    [onEventUpdate],
+    [updateEvent],
   );
 
   return {
+    events,
     handleEventSave,
     handleEventDelete,
     handleEventMove,

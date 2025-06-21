@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Calendar } from "@/components/ui/calendar";
-import { useCalendarContext } from "@/contexts/calendar-context";
+import { useCalendarState } from "@/hooks/use-calendar-state";
 import { cn } from "@/lib/utils";
 
 export function DatePicker() {
-  const { currentDate, setCurrentDate, view } = useCalendarContext();
+  const { currentDate, setCurrentDate, view } = useCalendarState();
   const [displayedDate, setDisplayedDate] = useState<Date>(currentDate);
   const [displayedMonth, setDisplayedMonth] = useState<Date>(currentDate);
   const updateSource = useRef<"internal" | "external">("external");

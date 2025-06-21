@@ -1,19 +1,11 @@
 import { useCallback } from "react";
 
-import { CalendarView } from "../types";
+import { useCalendarState } from "@/hooks/use-calendar-state";
 import { navigateToNext, navigateToPrevious } from "../utils";
 
-interface UseCalendarNavigationProps {
-  currentDate: Date;
-  setCurrentDate: (date: Date) => void;
-  view: CalendarView;
-}
+export function useCalendarNavigation() {
+  const { currentDate, view, setCurrentDate } = useCalendarState();
 
-export function useCalendarNavigation({
-  currentDate,
-  setCurrentDate,
-  view,
-}: UseCalendarNavigationProps) {
   const handlePrevious = useCallback(() => {
     setCurrentDate(navigateToPrevious(currentDate, view));
   }, [currentDate, view, setCurrentDate]);

@@ -4,7 +4,7 @@ import { AgendaView } from "@/components/event-calendar/views/agenda-view";
 import { DayView } from "@/components/event-calendar/views/day-view";
 import { MonthView } from "@/components/event-calendar/views/month-view";
 import { WeekView } from "@/components/event-calendar/views/week-view";
-import { useCalendarContext } from "@/contexts/calendar-context";
+import { useCalendarState } from "@/hooks/use-calendar-state";
 import { CalendarEvent } from "./types";
 
 interface CalendarContentProps {
@@ -18,7 +18,7 @@ export function CalendarContent({
   onEventSelect,
   onEventCreate,
 }: CalendarContentProps) {
-  const { currentDate, view } = useCalendarContext();
+  const { currentDate, view } = useCalendarState();
 
   switch (view) {
     case "month":

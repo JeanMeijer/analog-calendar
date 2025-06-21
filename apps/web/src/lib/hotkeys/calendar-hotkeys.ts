@@ -6,7 +6,7 @@ import {
   navigateToNext,
   navigateToPrevious,
 } from "@/components/event-calendar/utils/date-time";
-import { useCalendarContext } from "@/contexts/calendar-context";
+import { useCalendarState } from "@/hooks/use-calendar-state";
 
 export const KEYBOARD_SHORTCUTS = {
   MONTH: "m",
@@ -19,7 +19,7 @@ export const KEYBOARD_SHORTCUTS = {
 } as const;
 
 export function CalendarHotkeys() {
-  const { view, setView, setCurrentDate } = useCalendarContext();
+  const { view, setView, setCurrentDate } = useCalendarState();
 
   useHotkeys(KEYBOARD_SHORTCUTS.MONTH, () => setView("month"), {
     scopes: ["calendar"],
@@ -39,13 +39,14 @@ export function CalendarHotkeys() {
 
   useHotkeys(
     KEYBOARD_SHORTCUTS.NEXT_PERIOD,
-    () => setCurrentDate((prevDate) => navigateToNext(prevDate, view)),
+    () => setCurrentDate((prevDate: Date) => navigateToNext(prevDate, view)),
     { scopes: ["calendar"] },
   );
 
   useHotkeys(
     KEYBOARD_SHORTCUTS.PREVIOUS_PERIOD,
-    () => setCurrentDate((prevDate) => navigateToPrevious(prevDate, view)),
+    () =>
+      setCurrentDate((prevDate: Date) => navigateToPrevious(prevDate, view)),
     { scopes: ["calendar"] },
   );
 

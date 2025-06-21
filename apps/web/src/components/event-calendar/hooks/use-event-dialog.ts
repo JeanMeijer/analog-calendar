@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 import { Temporal } from "temporal-polyfill";
 
+import { useCalendarSettings } from "@/atoms";
 import { CalendarEvent } from "../types";
 import { snapTimeToInterval } from "../utils";
-import { useCalendarSettings } from "./use-calendar-settings";
 
 interface CreateEventParams {
   startTime: Date;

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
+import { useViewPreferences } from "@/atoms";
 import { isWeekend, isWeekendIndex } from "../utils/date-time";
-import { useViewPreferences } from "./use-view-preferences";
 
 interface GridLayoutOptions {
   /**

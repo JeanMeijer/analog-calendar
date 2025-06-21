@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { RiCalendarLine, RiDeleteBinLine } from "@remixicon/react";
-import { useQuery } from "@tanstack/react-query";
 import { format, isBefore } from "date-fns";
 import { toast } from "sonner";
 import { Temporal } from "temporal-polyfill";
 
 import { toDate } from "@repo/temporal";
 
+import { useCalendarSettings } from "@/atoms";
 import type { CalendarEvent } from "@/components/event-calendar";
 import {
   DefaultEndHour,
@@ -34,7 +34,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -43,9 +42,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useTRPC } from "@/lib/trpc/client";
+import { useDefaultAccount } from "@/hooks/accounts";
 import { cn } from "@/lib/utils";
-import { useCalendarSettings } from "./hooks/use-calendar-settings";
 
 interface EventDialogProps {
   event: CalendarEvent | null;
@@ -53,14 +51,6 @@ interface EventDialogProps {
   onClose: () => void;
   onSave: (event: CalendarEvent) => void;
   onDelete: (eventId: string) => void;
-}
-
-function useDefaultAccount() {
-  const trpc = useTRPC();
-
-  const { data } = useQuery(trpc.accounts.getDefault.queryOptions());
-
-  return data?.account;
 }
 
 export function EventDialog({

@@ -15,6 +15,7 @@ import {
 
 import { toDate } from "@repo/temporal";
 
+import { useCalendarSettings } from "@/atoms";
 import {
   DraggableEvent,
   DroppableCell,
@@ -26,7 +27,6 @@ import { EndHour, StartHour } from "@/components/event-calendar/constants";
 import { useCurrentTimeIndicator } from "@/components/event-calendar/hooks";
 import { isMultiDayEvent } from "@/components/event-calendar/utils";
 import { cn } from "@/lib/utils";
-import { useCalendarSettings } from "../hooks/use-calendar-settings";
 
 interface DayViewProps {
   currentDate: Date;

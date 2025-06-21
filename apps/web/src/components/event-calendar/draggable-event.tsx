@@ -5,12 +5,12 @@ import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Temporal } from "temporal-polyfill";
 
+import { useCalendarSettings } from "@/atoms";
 import {
   CalendarEvent,
   EventItem,
   useCalendarDnd,
 } from "@/components/event-calendar";
-import { useCalendarSettings } from "./hooks/use-calendar-settings";
 
 interface DraggableEventProps {
   event: CalendarEvent;

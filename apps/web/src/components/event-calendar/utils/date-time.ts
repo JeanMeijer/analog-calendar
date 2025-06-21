@@ -16,15 +16,17 @@ import {
   endOfWeek,
   format,
   getDay,
-  isBefore,
   isSameMonth,
   startOfWeek,
   subMonths,
   subWeeks,
 } from "date-fns";
 
-import { CALENDAR_CONFIG, TIME_INTERVALS } from "../calendar-constants";
-import { AgendaDaysToShow } from "../constants";
+import {
+  AgendaDaysToShow,
+  CALENDAR_CONFIG,
+  TIME_INTERVALS,
+} from "../constants";
 import { CalendarView } from "../types";
 
 /**

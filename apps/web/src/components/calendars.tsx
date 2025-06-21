@@ -1,11 +1,10 @@
 "use client";
 
-import { Fragment, useCallback, useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import { useResizeObserver } from "@react-hookz/web";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 
-import { useCalendarsVisibility } from "@/components/event-calendar/hooks";
 import {
   Collapsible,
   CollapsibleContent,
@@ -130,8 +129,6 @@ function CalendarName({ name }: { name: string }) {
 }
 
 function ItemWithToggle({ item }: { item: CalendarItem }) {
-  const [calendarsVisibility, setCalendarsVisibility] =
-    useCalendarsVisibility();
   const textRef = useRef<HTMLSpanElement>(null);
   const [isTextTruncated, setIsTextTruncated] = useState(false);
 
@@ -143,18 +140,18 @@ function ItemWithToggle({ item }: { item: CalendarItem }) {
     }
   });
 
-  const handleCalendarVisibilityChange = useCallback(
-    (checked: boolean, calendarId: string) => {
-      const newHiddenCalendars = checked
-        ? calendarsVisibility.hiddenCalendars.filter((id) => id !== calendarId)
-        : [...calendarsVisibility.hiddenCalendars, calendarId];
+  // const handleCalendarVisibilityChange = useCallback(
+  //   (checked: boolean, calendarId: string) => {
+  //     const newHiddenCalendars = checked
+  //       ? calendarsVisibility.hiddenCalendars.filter((id) => id !== calendarId)
+  //       : [...calendarsVisibility.hiddenCalendars, calendarId];
 
-      setCalendarsVisibility({
-        hiddenCalendars: newHiddenCalendars,
-      });
-    },
-    [calendarsVisibility.hiddenCalendars, setCalendarsVisibility],
-  );
+  //     setCalendarsVisibility({
+  //       hiddenCalendars: newHiddenCalendars,
+  //     });
+  //   },
+  //   [calendarsVisibility.hiddenCalendars, setCalendarsVisibility],
+  // );
 
   const tooltipProps = {
     side: "bottom" as const,
@@ -179,10 +176,10 @@ function ItemWithToggle({ item }: { item: CalendarItem }) {
               } as React.CSSProperties
             }
             className="dark:border-neutral-700"
-            checked={!calendarsVisibility.hiddenCalendars.includes(item.id)}
-            onCheckedChange={(checked: boolean) => {
-              handleCalendarVisibilityChange(checked, item.id);
-            }}
+            // checked={!calendarsVisibility.hiddenCalendars.includes(item.id)}
+            // onCheckedChange={(checked: boolean) => {
+            //   handleCalendarVisibilityChange(checked, item.id);
+            // }}
             primaryCalendar={item.primary}
           />
           <span ref={textRef} className="line-clamp-1 block select-none">
