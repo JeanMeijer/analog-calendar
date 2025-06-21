@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 206 140" fill="none">
+  <g clip-path="url(#theme-auto_svg__a)">
+    <g clip-path="url(#theme-auto_svg__b)">
+      <rect width="205.33" height="140" fill="#171717" rx="8"></rect>
+      <g clip-path="url(#theme-auto_svg__c)">
+        <rect width="205.33" height="140" fill="url(#theme-auto_svg__d)" rx="8"></rect>
+        <g clip-path="url(#theme-auto_svg__e)">
+          <rect width="200" height="140" x="18" y="16" fill="#171717" rx="6"></rect>
+          <path fill="#171717" d="M18 16h40v140H18z"></path>
+          <path stroke="#fff" stroke-opacity="0.04" d="M17.5 15.5h41v141h-41z"></path>
+          <path fill="#ED6A5F" fill-rule="evenodd" d="M24 24a2 2 0 1 0 0-4 2 2 0 0 0 0 4" clip-rule="evenodd"></path>
+          <path fill="#F5BF4F" fill-rule="evenodd" d="M30 24a2 2 0 1 0 0-4 2 2 0 0 0 0 4" clip-rule="evenodd"></path>
+          <path fill="#61C554" fill-rule="evenodd" d="M36 24a2 2 0 1 0 0-4 2 2 0 0 0 0 4" clip-rule="evenodd"></path>
+          <rect width="32" height="28" x="22" y="30" fill="#fff" fill-opacity="0.04" rx="2"></rect>
+          <rect width="32" height="6" x="22" y="62" fill="#3B82F6" fill-opacity="0.2" rx="2"></rect>
+          <rect width="3" height="3" x="23.5" y="63.5" fill="#3B82F6" fill-opacity="0.4" rx="1"></rect>
+          <path fill="#171717" d="M59 16h159v140H59z"></path>
+          <path fill="#0A0A0A" fill-opacity="0.04" d="M59 16h159v12H59z"></path>
+          <path fill="#0A0A0A" fill-opacity="0.2" d="M59 28h159v128H59z"></path>
+          <rect width="31" height="40" x="199" y="43" fill="#3B82F6" fill-opacity="0.2" rx="3"></rect>
+          <rect width="30" height="39" x="199.5" y="43.5" stroke="#3B82F6" stroke-opacity="0.1" rx="2.5"></rect>
+          <rect width="16" height="4" x="201" y="46" fill="#3B82F6" fill-opacity="0.4" rx="1"></rect>
+          <rect width="10" height="2" x="201" y="51" fill="#3B82F6" fill-opacity="0.2" rx="1"></rect>
+          <rect width="30" height="7" x="166" y="63" fill="#22C55E" fill-opacity="0.2" rx="3"></rect>
+          <rect width="29" height="6" x="166.5" y="63.5" stroke="#22C55E" stroke-opacity="0.1" rx="2.5"></rect>
+          <rect width="3" height="3" x="168" y="65" fill="#22C55E" fill-opacity="0.4" rx="1"></rect>
+          <rect width="14" height="2" x="172.5" y="65.5" fill="#22C55E" fill-opacity="0.2" rx="1"></rect>
+          <rect width="31" height="16" x="132" y="53" fill="#EAB308" fill-opacity="0.2" rx="3"></rect>
+          <rect width="30" height="15" x="132.5" y="53.5" stroke="#EAB308" stroke-opacity="0.1" rx="2.5"></rect>
+          <rect width="16" height="4" x="134" y="56" fill="#EAB308" fill-opacity="0.4" rx="1"></rect>
+          <rect width="10" height="2" x="134" y="61" fill="#EAB308" fill-opacity="0.2" rx="1"></rect>
+          <rect width="30" height="24" x="99" y="83" fill="#F97316" fill-opacity="0.2" rx="3"></rect>
+          <rect width="29" height="23" x="99.5" y="83.5" stroke="#F97316" stroke-opacity="0.1" rx="2.5"></rect>
+          <rect width="16" height="4" x="101" y="86" fill="#F97316" fill-opacity="0.4" rx="1"></rect>
+          <rect width="10" height="2" x="101" y="91" fill="#F97316" fill-opacity="0.2" rx="1"></rect>
+          <rect width="30" height="16" x="66" y="33" fill="#EF4444" fill-opacity="0.2" rx="3"></rect>
+          <rect width="29" height="15" x="66.5" y="33.5" stroke="#EF4444" stroke-opacity="0.1" rx="2.5"></rect>
+          <rect width="16" height="4" x="68" y="36" fill="#EF4444" fill-opacity="0.4" rx="1"></rect>
+          <rect width="10" height="2" x="68" y="41" fill="#EF4444" fill-opacity="0.2" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="32" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="42" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="52" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="62" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="72" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="82" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="92" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="102" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="112" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="122" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="132" fill="#fff" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <path fill="#DC2626" fill-opacity="0.2" d="M58 95h140v1H58z"></path>
+          <path fill="#DC2626" fill-opacity="0.8" d="M99 95h30v1H99z"></path>
+        </g>
+        <rect width="201" height="141" x="17.5" y="15.5" stroke="#262626" rx="6.5"></rect>
+      </g>
+    </g>
+    <rect width="204.33" height="139" x="0.5" y="0.5" stroke="#262626" rx="7.5"></rect>
+    <rect width="102.667" height="140" fill="#fff" rx="8"></rect>
+    <g clip-path="url(#theme-auto_svg__f)">
+      <mask id="theme-auto_svg__j" fill="#fff">
+        <path d="M0 8a8 8 0 0 1 8-8h94.667v140H8a8 8 0 0 1-8-8z"></path>
+      </mask>
+      <path fill="#fff" d="M0 8a8 8 0 0 1 8-8h94.667v140H8a8 8 0 0 1-8-8z"></path>
+      <g clip-path="url(#theme-auto_svg__g)">
+        <path fill="url(#theme-auto_svg__h)" d="M0 8a8 8 0 0 1 8-8h94.667v140H8a8 8 0 0 1-8-8z"></path>
+        <g clip-path="url(#theme-auto_svg__i)">
+          <rect width="200" height="140" x="18" y="16" fill="#FAFAFA" rx="6"></rect>
+          <path fill="#E5E5E5" d="M18 16h40v140H18z"></path>
+          <path stroke="#0A0A0A" stroke-opacity="0.04" d="M17.5 15.5h41v141h-41z"></path>
+          <path fill="#ED6A5F" fill-rule="evenodd" d="M24 24a2 2 0 1 0 0-4 2 2 0 0 0 0 4" clip-rule="evenodd"></path>
+          <path fill="#F5BF4F" fill-rule="evenodd" d="M30 24a2 2 0 1 0 0-4 2 2 0 0 0 0 4" clip-rule="evenodd"></path>
+          <path fill="#61C554" fill-rule="evenodd" d="M36 24a2 2 0 1 0 0-4 2 2 0 0 0 0 4" clip-rule="evenodd"></path>
+          <rect width="32" height="28" x="22" y="30" fill="#0A0A0A" fill-opacity="0.04" rx="2"></rect>
+          <rect width="32" height="6" x="22" y="62" fill="#3B82F6" fill-opacity="0.2" rx="2"></rect>
+          <rect width="3" height="3" x="23.5" y="63.5" fill="#3B82F6" fill-opacity="0.4" rx="1"></rect>
+          <path fill="#E5E5E5" d="M59 16h159v140H59z"></path>
+          <path fill="#fff" fill-opacity="0.4" d="M59 28h159v128H59z"></path>
+          <rect width="30" height="24" x="99" y="83" fill="#F97316" fill-opacity="0.2" rx="3"></rect>
+          <rect width="29" height="23" x="99.5" y="83.5" stroke="#F97316" stroke-opacity="0.1" rx="2.5"></rect>
+          <rect width="16" height="4" x="101" y="86" fill="#F97316" fill-opacity="0.4" rx="1"></rect>
+          <rect width="10" height="2" x="101" y="91" fill="#F97316" fill-opacity="0.2" rx="1"></rect>
+          <rect width="30" height="16" x="66" y="33" fill="#EF4444" fill-opacity="0.2" rx="3"></rect>
+          <rect width="29" height="15" x="66.5" y="33.5" stroke="#EF4444" stroke-opacity="0.1" rx="2.5"></rect>
+          <rect width="16" height="4" x="68" y="36" fill="#EF4444" fill-opacity="0.4" rx="1"></rect>
+          <rect width="10" height="2" x="68" y="41" fill="#EF4444" fill-opacity="0.2" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="32" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="42" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="52" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="62" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="72" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="82" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="92" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="102" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="112" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="122" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <rect width="4" height="2" x="60" y="132" fill="#0A0A0A" fill-opacity="0.1" opacity="0.6" rx="1"></rect>
+          <path fill="#DC2626" fill-opacity="0.2" d="M58 95h140v1H58z"></path>
+          <path fill="#DC2626" fill-opacity="0.8" d="M99 95h30v1H99z"></path>
+        </g>
+        <rect width="201" height="141" x="17.5" y="15.5" stroke="#E5E5E5" rx="6.5"></rect>
+      </g>
+    </g>
+    <path fill="#E5E5E5"
+      d="M-1 8a9 9 0 0 1 9-9h94.667v2H8a7 7 0 0 0-7 7zm103.667 133H8a9 9 0 0 1-9-9h2a7 7 0 0 0 7 7h94.667zM8 141a9 9 0 0 1-9-9V8a9 9 0 0 1 9-9v2a7 7 0 0 0-7 7v124a7 7 0 0 0 7 7zM102.667 0v140z"
+      mask="url(#theme-auto_svg__j)"></path>
+  </g>
+  <defs>
+    <clipPath id="theme-auto_svg__a">
+      <rect width="205.333" height="140" fill="#fff" rx="8"></rect>
+    </clipPath>
+    <clipPath id="theme-auto_svg__b">
+      <rect width="205.33" height="140" fill="#fff" rx="8"></rect>
+    </clipPath>
+    <clipPath id="theme-auto_svg__c">
+      <rect width="205.33" height="140" fill="#fff" rx="8"></rect>
+    </clipPath>
+    <clipPath id="theme-auto_svg__e">
+      <rect width="200" height="140" x="18" y="16" fill="#fff" rx="6"></rect>
+    </clipPath>
+    <clipPath id="theme-auto_svg__f">
+      <path fill="#fff" d="M0 8a8 8 0 0 1 8-8h94.667v140H8a8 8 0 0 1-8-8z"></path>
+    </clipPath>
+    <clipPath id="theme-auto_svg__g">
+      <path fill="#fff" d="M0 8a8 8 0 0 1 8-8h94.667v140H8a8 8 0 0 1-8-8z"></path>
+    </clipPath>
+    <clipPath id="theme-auto_svg__i">
+      <rect width="200" height="140" x="18" y="16" fill="#fff" rx="6"></rect>
+    </clipPath>
+    <radialGradient id="theme-auto_svg__d" cx="0" cy="0" r="1"
+      gradientTransform="matrix(205.32968 139.99973 -198.14742 290.61161 0 0)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity="0.04"></stop>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.01"></stop>
+    </radialGradient>
+    <radialGradient id="theme-auto_svg__h" cx="0" cy="0" r="1" gradientTransform="rotate(53.746)scale(173.61 251.752)"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A0A0A" stop-opacity="0.04"></stop>
+      <stop offset="1" stop-color="#0A0A0A" stop-opacity="0.02"></stop>
+    </radialGradient>
+  </defs>
+</svg>

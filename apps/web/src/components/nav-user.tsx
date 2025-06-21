@@ -1,13 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronsUpDown, LogOut, Plus, UserRound } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useHotkeys } from "react-hotkeys-hook";
 
 import { authClient } from "@repo/auth/client";
 
 import { AddAccountDialog } from "@/components/add-account-dialog";
+import { SettingsDialog } from "@/components/settings-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -36,15 +38,6 @@ export function NavUser() {
   const queryClient = useQueryClient();
 
   const { data: user, isLoading } = useUser();
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    if (theme === "dark") {
-      setTheme("light");
-    } else {
-      setTheme("dark");
-    }
-  };
 
   if (isLoading) {
     return <NavUserSkeleton />;
@@ -106,6 +99,7 @@ export function NavUser() {
                 <UserRound />
                 Account
               </DropdownMenuItem>
+              <SettingsDialog />
               <AddAccountDialog>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   <Plus />

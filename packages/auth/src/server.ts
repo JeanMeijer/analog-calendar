@@ -44,6 +44,11 @@ export const auth = betterAuth({
         required: false,
         input: false,
       },
+      defaultCalendarId: {
+        type: "string",
+        required: false,
+        input: false,
+      },
     },
   },
   databaseHooks: {

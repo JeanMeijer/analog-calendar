@@ -15,6 +15,7 @@ export const accountsRouter = createTRPCRouter({
     return {
       accounts: accounts.map((account) => ({
         id: account.id,
+        accountId: account.accountId,
         providerId: account.providerId,
         name: account.name,
         email: account.email,
@@ -58,7 +59,7 @@ export const accountsRouter = createTRPCRouter({
       },
     };
   }),
-  delete: protectedProcedure
+  disconnect: protectedProcedure
     .input(
       z.object({
         id: z.string(),

@@ -22,6 +22,13 @@
       "when": 1748881983618,
       "tag": "0002_lean_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1750502407347,
+      "tag": "0003_open_the_watchers",
+      "breakpoints": true
     }
   ]
 }
