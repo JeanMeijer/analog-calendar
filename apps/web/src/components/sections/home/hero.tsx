@@ -1,13 +1,16 @@
 import Image from "next/image";
+import { Variants } from "motion/react";
+
 import PreviewDark from "@/assets/dark-preview.png";
 import PreviewLight from "@/assets/preview.png";
-import { WaitlistForm } from "./waitlist-form";
-import { HydrateClient, prefetch, trpc } from "@/lib/trpc/server";
 import { AnimatedGroup } from "@/components/ui/animated-group";
+import { HydrateClient, prefetch, trpc } from "@/lib/trpc/server";
+import { WaitlistForm } from "./waitlist-form";
+
 // import { CalendarWindow } from "./calendar-window";
 // import { cn } from "@/lib/utils";
 
-const transitionVariants = {
+const transitionVariants: Record<string, Variants> = {
   item: {
     hidden: {
       opacity: 0,
@@ -31,15 +34,14 @@ export function Hero() {
   prefetch(trpc.earlyAccess.getWaitlistCount.queryOptions());
 
   return (
-    <div className="flex flex-col gap-12 md:gap-16 w-full max-w-6xl overflow-hidden">
+    <div className="flex w-full max-w-6xl flex-col gap-12 overflow-hidden md:gap-16">
       <AnimatedGroup variants={transitionVariants}>
         <div className="flex flex-col gap-12 px-4 md:px-6">
-          <div className="flex flex-col gap-3 md:gap-6 items-center justify-center text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl leading-tight font-satoshi">
-              Beyond Scheduling. <br className="hidden sm:block" /> A calendar
-              that understands your life.
+          <div className="flex flex-col items-center justify-center gap-3 text-center md:gap-6">
+            <h1 className="font-satoshi text-4xl leading-tight md:text-5xl lg:text-6xl">
+              Beyond Scheduling. <br /> A calendar that understands your life.
             </h1>
-            <p className="text-muted-foreground text-base md:text-lg max-w-xl">
+            <p className="max-w-xl text-base text-muted-foreground md:text-lg">
               Analog is an open-source alternative that turns intentions into
               actions.
             </p>
@@ -64,7 +66,7 @@ export function Hero() {
           ...transitionVariants,
         }}
       >
-        <div className="min-w-[300vw] px-4 sm:px-6 w-full sm:max-w-7xl sm:min-w-0 sm:translate-x-0 mx-auto">
+        <div className="mx-auto w-full min-w-[300vw] px-4 sm:max-w-7xl sm:min-w-0 sm:translate-x-0 sm:px-6">
           {/* <div className="w-full [--base-height:874px] [--display-height:calc(var(--base-height)_*_var(--preview-scale))] [--preview-scale:0.5] sm:[--preview-scale:0.8]">
             <div className="[--item-width:1400px]">
               <CalendarWindow className="h-(--base-height) w-(--item-width) scale-(--preview-scale) origin-top-left" />
@@ -74,13 +76,13 @@ export function Hero() {
           <Image
             src={PreviewDark}
             alt="Hero"
-            className="rounded-lg hidden dark:block"
+            className="hidden rounded-lg dark:block"
             unoptimized
           />
           <Image
             src={PreviewLight}
             alt="Hero"
-            className="rounded-lg block dark:hidden"
+            className="block rounded-lg dark:hidden"
             unoptimized
           />
         </div>

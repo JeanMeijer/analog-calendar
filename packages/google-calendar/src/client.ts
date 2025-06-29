@@ -1,63 +1,47 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import type {
-  RequestInit,
-  RequestInfo,
-  BodyInit,
-} from "./internal/builtin-types";
-import type {
-  HTTPMethod,
-  PromiseOrValue,
-  MergedRequestInit,
-  FinalizedRequestInit,
-} from "./internal/types";
-import { uuid4 } from "./internal/utils/uuid";
-import {
-  validatePositiveInteger,
-  isAbsoluteURL,
-  safeJSON,
-} from "./internal/utils/values";
-import { sleep } from "./internal/utils/sleep";
-import {
-  type Logger,
-  type LogLevel,
-  parseLogLevel,
-} from "./internal/utils/log";
-export type { Logger, LogLevel } from "./internal/utils/log";
-import { castToError, isAbortError } from "./internal/errors";
-import type { APIResponseProps } from "./internal/parse";
-import { getPlatformHeaders } from "./internal/detect-platform";
-import * as Shims from "./internal/shims";
-import * as Opts from "./internal/request-options";
-import * as qs from "./internal/qs";
-import { VERSION } from "./version";
+import { APIPromise } from "./core/api-promise";
 import * as Errors from "./core/error";
 import * as Uploads from "./core/uploads";
-import * as API from "./resources/index";
-import { APIPromise } from "./core/api-promise";
-import { type Fetch } from "./internal/builtin-types";
+import {
+  type BodyInit,
+  type Fetch,
+  type RequestInfo,
+  type RequestInit,
+} from "./internal/builtin-types";
+import { getPlatformHeaders } from "./internal/detect-platform";
+import { castToError, isAbortError } from "./internal/errors";
 import { HeadersLike, NullableHeaders, buildHeaders } from "./internal/headers";
+import type { APIResponseProps } from "./internal/parse";
+import * as qs from "./internal/qs";
+import * as Opts from "./internal/request-options";
 import {
   FinalRequestOptions,
   RequestOptions,
 } from "./internal/request-options";
-import {
-  CheckFreeBusy,
-  CheckFreeBusyCheckFreeBusyParams,
-  CheckFreeBusyCheckFreeBusyResponse,
-} from "./resources/check-free-busy";
-import {
-  ListColorListColorsParams,
-  ListColorListColorsResponse,
-  ListColors,
-} from "./resources/list-colors";
-import {
-  StopWatching,
-  StopWatchingStopWatchingParams,
-} from "./resources/stop-watching";
+import * as Shims from "./internal/shims";
+import type {
+  FinalizedRequestInit,
+  HTTPMethod,
+  MergedRequestInit,
+  PromiseOrValue,
+} from "./internal/types";
 import { readEnv } from "./internal/utils/env";
-import { formatRequestDetails, loggerFor } from "./internal/utils/log";
-import { isEmptyObj } from "./internal/utils/values";
+import {
+  formatRequestDetails,
+  loggerFor,
+  parseLogLevel,
+  type LogLevel,
+  type Logger,
+} from "./internal/utils/log";
+import { sleep } from "./internal/utils/sleep";
+import { uuid4 } from "./internal/utils/uuid";
+import {
+  isAbsoluteURL,
+  isEmptyObj,
+  safeJSON,
+  validatePositiveInteger,
+} from "./internal/utils/values";
 import {
   Calendar,
   CalendarClearParams,
@@ -67,7 +51,25 @@ import {
   CalendarUpdateParams,
   Calendars,
 } from "./resources/calendars/calendars";
+import {
+  CheckFreeBusy,
+  CheckFreeBusyCheckFreeBusyParams,
+  CheckFreeBusyCheckFreeBusyResponse,
+} from "./resources/check-free-busy";
+import * as API from "./resources/index";
+import {
+  ListColorListColorsParams,
+  ListColorListColorsResponse,
+  ListColors,
+} from "./resources/list-colors";
+import {
+  StopWatching,
+  StopWatchingStopWatchingParams,
+} from "./resources/stop-watching";
 import { Users } from "./resources/users/users";
+import { VERSION } from "./version";
+
+export type { Logger, LogLevel } from "./internal/utils/log";
 
 export interface ClientOptions {
   accessToken: string;

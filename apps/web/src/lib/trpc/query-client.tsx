@@ -1,8 +1,9 @@
 import {
-  defaultShouldDehydrateQuery,
   QueryClient,
+  defaultShouldDehydrateQuery,
 } from "@tanstack/react-query";
-import SuperJSON from "superjson";
+
+import { superjson as SuperJSON } from "./superjson";
 
 export function makeQueryClient() {
   return new QueryClient({
@@ -11,6 +12,9 @@ export function makeQueryClient() {
         // With SSR, we usually want to set some default staleTime
         // above 0 to avoid refetching immediately on the client
         staleTime: 60 * 1000,
+        refetchOnReconnect: "always",
+        refetchOnWindowFocus: "always",
+        refetchOnMount: "always",
       },
       dehydrate: {
         serializeData: SuperJSON.serialize,

@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { TRPCReactProvider } from "@/lib/trpc/client";
+
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { TRPCReactProvider } from "@/lib/trpc/client";
 
 export function Providers(props: Readonly<{ children: ReactNode }>) {
   return (

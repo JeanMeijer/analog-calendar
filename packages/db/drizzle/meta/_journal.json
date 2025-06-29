@@ -15,6 +15,13 @@
       "when": 1747885862700,
       "tag": "0001_amusing_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1748881983618,
+      "tag": "0002_lean_iron_monger",
+      "breakpoints": true
     }
   ]
 }

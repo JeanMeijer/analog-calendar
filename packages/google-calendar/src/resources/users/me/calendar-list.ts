@@ -1,11 +1,11 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { APIResource } from "../../../core/resource";
-import * as Shared from "../../shared";
 import { APIPromise } from "../../../core/api-promise";
+import { APIResource } from "../../../core/resource";
 import { buildHeaders } from "../../../internal/headers";
 import { RequestOptions } from "../../../internal/request-options";
 import { path } from "../../../internal/utils/path";
+import * as Shared from "../../shared";
 
 export class CalendarList extends APIResource {
   /**

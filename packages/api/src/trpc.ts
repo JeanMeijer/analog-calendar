@@ -1,9 +1,13 @@
 import "server-only";
-import { initTRPC, TRPCError } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import { ZodError } from "zod";
-import superjson from "superjson";
-import { db } from "@repo/db";
+
 import { auth } from "@repo/auth/server";
+import { db } from "@repo/db";
+
+import { accountToProvider } from "./providers";
+import { getAccounts } from "./utils/accounts";
+import { superjson } from "./utils/superjson";
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await auth.api.getSession({
@@ -51,3 +55,29 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     },
   });
 });
+
+export const calendarProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    try {
+      const accounts = await getAccounts(ctx.user, ctx.headers);
+
+      const providers = accounts.map((account) => ({
+        account,
+        client: accountToProvider(account),
+      }));
+
+      return next({
+        ctx: {
+          ...ctx,
+          providers,
+          accounts,
+        },
+      });
+    } catch (error) {
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);

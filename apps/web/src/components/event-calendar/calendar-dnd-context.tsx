@@ -21,8 +21,11 @@ import {
   type DragStartEvent,
   type UniqueIdentifier,
 } from "@dnd-kit/core";
-import { addMinutes, differenceInMinutes } from "date-fns";
+import { Temporal } from "temporal-polyfill";
 
+import { compareTemporal, toDate } from "@repo/temporal";
+
+import { useCalendarSettings } from "@/atoms";
 import { EventItem, type CalendarEvent } from "@/components/event-calendar";
 
 // Define the context type
@@ -56,10 +59,35 @@ const CalendarDndContext = createContext<CalendarDndContextType>({
   dragHandlePosition: null,
 });
 
+interface CalculateDateTimeOptions {
+  displayTimeZone: string;
+  original: Temporal.Instant | Temporal.ZonedDateTime;
+  date: Temporal.PlainDate;
+  time: Temporal.PlainTime;
+}
+
+function calculateDateTime({
+  original,
+  date,
+  time,
+  displayTimeZone,
+}: CalculateDateTimeOptions) {
+  if (original instanceof Temporal.Instant) {
+    throw new Error("Not implemented");
+  }
+
+  return date
+    .toZonedDateTime({
+      plainTime: time,
+      timeZone: displayTimeZone,
+    })
+    .withTimeZone(original.timeZoneId);
+}
+
 // Hook to use the context
 export const useCalendarDnd = () => useContext(CalendarDndContext);
 
-// Props for the provider
+// Props for the providerId
 interface CalendarDndProviderProps {
   children: ReactNode;
   onEventUpdate: (event: CalendarEvent) => void;
@@ -86,6 +114,8 @@ export function CalendarDndProvider({
       isLastDay?: boolean;
     };
   } | null>(null);
+
+  const settings = useCalendarSettings();
 
   // Store original event dimensions
   const eventDimensions = useRef<{ height: number }>({ height: 0 });
@@ -151,7 +181,13 @@ export function CalendarDndProvider({
     setActiveEvent(calendarEvent);
     setActiveId(active.id);
     setActiveView(view);
-    setCurrentTime(new Date(calendarEvent.start));
+    // TODO: This is probably gonna cause issues when the default timezone changes
+    setCurrentTime(
+      toDate({
+        value: calendarEvent.start,
+        timeZone: settings.defaultTimeZone,
+      }),
+    );
     setIsMultiDay(eventIsMultiDay || false);
     setMultiDayWidth(eventMultiDayWidth || null);
     setDragHandlePosition(eventDragHandlePosition || null);
@@ -261,7 +297,13 @@ export function CalendarDndProvider({
       const time = overData.time;
 
       // Calculate new start time
-      const newStart = new Date(date);
+      const datePart = Temporal.PlainDate.from({
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate(),
+      });
+
+      let timePart: Temporal.PlainTime;
 
       // If time is provided (for week/day views), set the hours and minutes
       if (time !== undefined) {
@@ -275,30 +317,48 @@ export function CalendarDndProvider({
         else if (fractionalHour < 0.625) minutes = 30;
         else minutes = 45;
 
-        newStart.setHours(hours, minutes, 0, 0);
+        // newStart.setHours(hours, minutes, 0, 0);
+        timePart = Temporal.PlainTime.from({
+          hour: hours,
+          minute: minutes,
+        });
       } else {
         // For month view, preserve the original time from currentTime
-        newStart.setHours(
-          currentTime.getHours(),
-          currentTime.getMinutes(),
-          currentTime.getSeconds(),
-          currentTime.getMilliseconds(),
-        );
+        timePart = Temporal.PlainTime.from({
+          hour: currentTime.getHours(),
+          minute: currentTime.getMinutes(),
+          second: currentTime.getSeconds(),
+          millisecond: currentTime.getMilliseconds(),
+        });
       }
 
       // Calculate new end time based on the original duration
-      const originalStart = new Date(calendarEvent.start);
-      const originalEnd = new Date(calendarEvent.end);
-      const durationMinutes = differenceInMinutes(originalEnd, originalStart);
-      const newEnd = addMinutes(newStart, durationMinutes);
+      const originalStart = calendarEvent.start;
+      const originalEnd = calendarEvent.end;
+
+      if (originalStart instanceof Temporal.PlainDate) {
+        throw new Error("Original start is a plain date");
+      }
+
+      if (originalEnd instanceof Temporal.PlainDate) {
+        throw new Error("Original end is a plain date");
+      }
+
+      // @ts-expect-error -- Needs a better solution
+      const duration = originalEnd.since(originalStart);
+
+      const newStart = calculateDateTime({
+        displayTimeZone: settings.defaultTimeZone,
+        original: originalStart,
+        date: datePart,
+        time: timePart,
+      });
+
+      const newEnd = newStart.add(duration);
 
       // Only update if the start time has actually changed
       const hasStartTimeChanged =
-        originalStart.getFullYear() !== newStart.getFullYear() ||
-        originalStart.getMonth() !== newStart.getMonth() ||
-        originalStart.getDate() !== newStart.getDate() ||
-        originalStart.getHours() !== newStart.getHours() ||
-        originalStart.getMinutes() !== newStart.getMinutes();
+        compareTemporal(originalStart, newStart) !== 0;
 
       if (hasStartTimeChanged) {
         // Update the event only if the time has changed
@@ -323,6 +383,25 @@ export function CalendarDndProvider({
     }
   };
 
+  // Handle drag cancel (e.g., when ESC key is pressed)
+  const handleDragCancel = () => {
+    try {
+      /* empty */
+    } catch (error) {
+      console.error("Error in drag cancel handler:", error);
+    } finally {
+      // Reset state
+      setActiveEvent(null);
+      setActiveId(null);
+      setActiveView(null);
+      setCurrentTime(null);
+      setEventHeight(null);
+      setIsMultiDay(false);
+      setMultiDayWidth(null);
+      setDragHandlePosition(null);
+    }
+  };
+
   return (
     <DndContext
       id={dndContextId}
@@ -330,6 +409,7 @@ export function CalendarDndProvider({
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
     >
       <CalendarDndContext.Provider
         value={{

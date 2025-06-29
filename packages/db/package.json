@@ -14,18 +14,20 @@
     "db:studio": "drizzle-kit studio",
     "format": "prettier --write \"**/*.{ts,tsx,css,,md}\""
   },
+  "peerDependencies": {
+    "drizzle-orm": "^0.43.1"
+  },
   "dependencies": {
     "@repo/env": "workspace:*",
-    "drizzle-orm": "^0.43.1",
-    "postgres": "^3.4.5",
+    "postgres": "^3.4.7",
     "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20",
-    "drizzle-kit": "^0.31.1",
-    "eslint": "^9",
-    "typescript": "^5"
+    "@types/node": "^20.19.1",
+    "drizzle-kit": "^0.31.2",
+    "eslint": "^9.29.0",
+    "typescript": "^5.8.3"
   }
 }

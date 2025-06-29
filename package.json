@@ -5,7 +5,7 @@
     "build": "dotenv -- turbo run build",
     "dev": "dotenv -- turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,css,,md}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,css,md}\"",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:clean": "docker-compose down -v",
@@ -15,9 +15,11 @@
     "db:studio": "dotenv -- turbo run db:studio"
   },
   "devDependencies": {
-    "turbo": "^2.5.3",
+    "@ianvs/prettier-plugin-sort-imports": "^3.7.2",
     "dotenv-cli": "^8.0.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.6.0",
+    "prettier-plugin-tailwindcss": "^0.6.13",
+    "turbo": "^2.5.4"
   },
   "packageManager": "bun@1.2.13",
   "workspaces": ["apps/*", "packages/*", "tooling/*"]

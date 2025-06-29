@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+
 import { auth } from "@repo/auth/server";
+
 import { SignInForm } from "./sign-in-form";
 
 export const metadata: Metadata = {
@@ -16,7 +18,7 @@ export default async function Page() {
   }
 
   return (
-    <div className="w-dvw h-dvh flex items-center justify-center">
+    <div className="flex h-dvh w-dvw items-center justify-center">
       <SignInForm />
     </div>
   );

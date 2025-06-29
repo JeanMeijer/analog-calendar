@@ -3,7 +3,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
+:root,
+.light {
   --background: var(--color-white);
   --foreground: var(--color-neutral-950);
   --card: var(--color-white);
@@ -19,7 +20,7 @@
   --accent: var(--color-neutral-100);
   --accent-foreground: var(--color-neutral-900);
   --destructive: var(--color-red-600);
-  --destructive-foreground: var(--color-red-600);
+  --destructive-foreground: var(--color-red-500);
   --border: var(--color-neutral-200);
   --input: var(--color-neutral-200);
   --ring: var(--color-neutral-400);
@@ -37,41 +38,72 @@
   --sidebar-accent-foreground: var(--color-neutral-900);
   --sidebar-border: var(--color-neutral-200);
   --sidebar-ring: var(--color-neutral-400);
+  --avatar-gradient-top: var(--color-zinc-200);
+  --avatar-gradient-bottom: var(--color-zinc-100);
+  --analog-neutral: oklch(0.945 0 0);
+  --calendar-red: #fb2c36;
+  --calendar-orange: #ff6900;
+  --calendar-yellow: #f0b100;
+  --calendar-green: #00c950;
+  --calendar-blue: #2b7fff;
+  --calendar-purple: #ad46ff;
 }
 
 .dark {
+  --landing-background: color-mix(
+    in oklch,
+    var(--color-neutral-950) 50%,
+    var(--color-neutral-900)
+  );
   --background: var(--color-neutral-900);
   --foreground: var(--color-neutral-50);
-  --card: var(--color-neutral-950);
+  --card: var(--color-neutral-900);
   --card-foreground: var(--color-neutral-50);
-  --popover: var(--color-neutral-950);
+  --popover: var(--color-neutral-800);
   --popover-foreground: var(--color-neutral-50);
-  --primary: var(--color-neutral-50);
+  --primary: var(--color-neutral-200);
   --primary-foreground: var(--color-neutral-900);
   --secondary: var(--color-neutral-800);
   --secondary-foreground: var(--color-neutral-50);
   --muted: var(--color-neutral-800);
   --muted-foreground: var(--color-neutral-400);
-  --accent: var(--color-neutral-800);
+  --accent: var(--color-neutral-700);
   --accent-foreground: var(--color-neutral-50);
-  --destructive: var(--color-red-900);
-  --destructive-foreground: var(--color-red-500);
-  --border: var(--color-neutral-800);
-  --input: var(--color-neutral-800);
-  --ring: var(--color-neutral-600);
+  --destructive: var(--color-red-400);
+  --border: color-mix(
+    in oklch,
+    var(--color-neutral-800) 50%,
+    var(--color-neutral-700)
+  );
+  --input: color-mix(
+    in oklch,
+    var(--color-neutral-800) 50%,
+    var(--color-neutral-700)
+  );
+  --ring: var(--color-neutral-500);
   --chart-1: var(--color-blue-700);
   --chart-2: var(--color-emerald-500);
   --chart-3: var(--color-amber-500);
   --chart-4: var(--color-purple-500);
   --chart-5: var(--color-rose-500);
-  --sidebar: var(--color-neutral-900);
+  --sidebar: color-mix(
+    in oklch,
+    var(--color-neutral-900) 50%,
+    var(--color-neutral-800)
+  );
   --sidebar-foreground: var(--color-neutral-50);
   --sidebar-primary: var(--color-blue-500);
   --sidebar-primary-foreground: var(--color-neutral-50);
   --sidebar-accent: var(--color-neutral-800);
   --sidebar-accent-foreground: var(--color-neutral-50);
-  --sidebar-border: var(--color-neutral-800);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-ring: var(--color-neutral-600);
+  --avatar-gradient-top: color-mix(
+    in oklch,
+    var(--color-neutral-800) 50%,
+    var(--color-neutral-900) 50%
+  );
+  --avatar-gradient-bottom: var(--color-neutral-800);
 }
 
 @theme inline {
@@ -114,6 +146,55 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-avatar-gradient-top: var(--avatar-gradient-top);
+  --color-avatar-gradient-bottom: var(--avatar-gradient-bottom);
+  --background-color-event: color-mix(
+    in oklab,
+    var(--background),
+    var(--calendar-color) 20%
+  );
+  --border-color-event: color-mix(
+    in oklab,
+    var(--background),
+    var(--calendar-color) 30%
+  );
+  --text-color-event: color-mix(
+    in oklab,
+    var(--foreground),
+    var(--calendar-color) 80%
+  );
+  --background-color-event-hover: color-mix(
+    in oklab,
+    var(--background),
+    var(--calendar-color) 30%
+  );
+  --border-color-event-hover: color-mix(
+    in oklab,
+    var(--background),
+    var(--calendar-color) 40%
+  );
+  --color-analog-neutral: var(--analog-neutral);
+  --color-calendar-red: var(--calendar-red);
+  --color-calendar-orange: var(--calendar-orange);
+  --color-calendar-yellow: var(--calendar-yellow);
+  --color-calendar-green: var(--calendar-green);
+  --color-calendar-blue: var(--calendar-blue);
+  --color-calendar-purple: var(--calendar-purple);
+  --color-calendar-base: color-mix(
+    in oklab,
+    var(--background),
+    var(--calendar-tint) 20%
+  );
+  --color-calendar-accent: color-mix(
+    in oklab,
+    var(--background),
+    var(--calendar-tint) 30%
+  );
+  --color-calendar-foreground: color-mix(
+    in oklab,
+    var(--foreground),
+    var(--calendar-tint) 80%
+  );
 }
 
 @layer base {
@@ -146,4 +227,47 @@
       }
     }
   }
+}
+
+@utility scrollbar-hidden {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(166, 160, 155, 0.2),
+    transparent
+  );
+  animation: shimmer 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.84) infinite;
+  will-change: transform;
+}
+
+.dark .animate-shimmer::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(115, 115, 115, 0.35),
+    transparent
+  );
 }

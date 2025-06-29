@@ -1,7 +1,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import type { FinalRequestOptions } from "./request-options";
 import { type GoogleCalendar } from "../client";
+import type { FinalRequestOptions } from "./request-options";
 import { formatRequestDetails, loggerFor } from "./utils/log";
 
 export type APIResponseProps = {

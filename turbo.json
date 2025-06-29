@@ -11,7 +11,13 @@
         "GOOGLE_CLIENT_ID",
         "GOOGLE_CLIENT_SECRET",
         "VERCEL_URL",
-        "NEXT_PUBLIC_VERCEL_URL"
+        "NEXT_PUBLIC_VERCEL_URL",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "SIMPLE_ANALYTICS_HOSTNAME",
+        "NEXT_PUBLIC_SIMPLE_ANALYTICS_HOSTNAME",
+        "MICROSOFT_CLIENT_ID",
+        "MICROSOFT_CLIENT_SECRET"
       ],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
@@ -25,7 +31,13 @@
         "BETTER_AUTH_SECRET",
         "BETTER_AUTH_URL",
         "GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET"
+        "GOOGLE_CLIENT_SECRET",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "SIMPLE_ANALYTICS_HOSTNAME",
+        "NEXT_PUBLIC_SIMPLE_ANALYTICS_HOSTNAME",
+        "MICROSOFT_CLIENT_ID",
+        "MICROSOFT_CLIENT_SECRET"
       ]
     },
     "lint": {
@@ -36,18 +48,18 @@
     },
     "db:migrate": {
       "cache": false,
-      "env": [ "DATABASE_URL" ],
+      "env": ["DATABASE_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "db:push": {
       "cache": false,
-      "env": [ "DATABASE_URL" ],
+      "env": ["DATABASE_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "db:studio": {
       "persistent": true,
       "cache": false,
-      "env": [ "DATABASE_URL" ],
+      "env": ["DATABASE_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     }
   }

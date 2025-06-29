@@ -1,0 +1,58 @@
+name: Bug Report
+description: Report something that isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🐞 Found a bug? Thanks for reporting it! Please include as much detail as you can.
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: What’s the bug?
+      description: Clearly describe the issue or error you encountered.
+      placeholder: When I try to..., the app...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we reproduce it?
+      description: Provide the steps to trigger the bug.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See the error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      placeholder: I expected it to...
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment details
+      description: OS, browser, app version, or anything else helpful.
+      placeholder: |
+        - OS: macOS 14
+        - Browser: Firefox 125
+        - App version: v1.2.0
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recordings (optional)
+      description: Drag and drop images or videos if they help explain the problem.
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log output (if any)
+      description: Paste any relevant logs or console errors.
+      render: shell

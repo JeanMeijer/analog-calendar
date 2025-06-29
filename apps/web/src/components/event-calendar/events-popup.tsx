@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef } from "react";
 import { format, isSameDay } from "date-fns";
 import { XIcon } from "lucide-react";
 
+import { toDate } from "@repo/temporal";
+
 import { EventItem, type CalendarEvent } from "@/components/event-calendar";
 
 interface EventsPopupProps {
@@ -86,17 +88,17 @@ export function EventsPopup({
   return (
     <div
       ref={popupRef}
-      className="bg-background absolute z-50 max-h-96 w-80 overflow-auto rounded-md border shadow-lg"
+      className="absolute z-50 max-h-96 w-80 overflow-auto rounded-md border bg-background shadow-lg"
       style={{
         top: `${adjustedPosition.top}px`,
         left: `${adjustedPosition.left}px`,
       }}
     >
-      <div className="bg-background sticky top-0 flex items-center justify-between border-b p-3">
+      <div className="sticky top-0 flex items-center justify-between border-b bg-background p-3">
         <h3 className="font-medium">{format(date, "d MMMM yyyy")}</h3>
         <button
           onClick={onClose}
-          className="hover:bg-muted rounded-full p-1"
+          className="rounded-full p-1 hover:bg-muted"
           aria-label="Close"
         >
           <XIcon className="h-4 w-4" />
@@ -105,11 +107,11 @@ export function EventsPopup({
 
       <div className="space-y-2 p-3">
         {events.length === 0 ? (
-          <div className="text-muted-foreground py-2 text-sm">No events</div>
+          <div className="py-2 text-sm text-muted-foreground">No events</div>
         ) : (
           events.map((event) => {
-            const eventStart = new Date(event.start);
-            const eventEnd = new Date(event.end);
+            const eventStart = toDate({ value: event.start, timeZone: "UTC" });
+            const eventEnd = toDate({ value: event.end, timeZone: "UTC" });
             const isFirstDay = isSameDay(date, eventStart);
             const isLastDay = isSameDay(date, eventEnd);
 

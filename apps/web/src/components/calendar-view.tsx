@@ -1,70 +1,132 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { addDays, subDays, endOfDay } from "date-fns";
-import { EventCalendar, type CalendarEvent, type EventColor } from "@/components/event-calendar";
-import { useTRPC } from "@/lib/trpc/client";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
+import { Plus } from "lucide-react";
+import { useHotkeysContext } from "react-hotkeys-hook";
+import { toast } from "sonner";
+
+import { useCalendarsVisibility, useViewPreferences } from "@/atoms";
+import {
+  CalendarContent,
+  CalendarDndProvider,
+  CalendarHeader,
+  EventDialog,
+  EventGap,
+  EventHeight,
+  WeekCellsHeight,
+} from "@/components/event-calendar";
+import {
+  useEventDialog,
+  useEventOperations,
+} from "@/components/event-calendar/hooks";
+import {
+  filterPastEvents,
+  filterVisibleEvents,
+} from "@/components/event-calendar/utils";
+import { Button } from "@/components/ui/button";
+import { useSidebarWithSide } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 interface CalendarViewProps {
   className?: string;
 }
 
-const colorMap: Record<string, EventColor> = {
-  "1": "sky",
-  "2": "emerald",
-  "3": "violet",
-  "4": "rose",
-  "5": "amber",
-  "6": "orange",
-  "7": "sky",
-  "8": "violet",
-  "9": "sky",
-  "10": "emerald",
-  "11": "rose",
-};
-
 export function CalendarView({ className }: CalendarViewProps) {
-  const trpc = useTRPC();
+  const viewPreferences = useViewPreferences();
+  const [calendarVisibility] = useCalendarsVisibility();
+  const { toggleSidebar: toggleRightSidebar, open: isRightSidebarOpen } =
+    useSidebarWithSide("right");
 
-  const timeMin = useMemo(() => subDays(new Date(), 30).toISOString(), []);
-  const timeMax = useMemo(() => addDays(new Date(), 60).toISOString(), []);
+  const {
+    isEventDialogOpen,
+    selectedEvent,
+    handleEventSelect,
+    handleDialogClose,
+  } = useEventDialog();
 
-  const { data, isLoading, error } = useQuery(
-    trpc.calendars.events.queryOptions({
-      timeMin,
-      timeMax,
-    })
+  const { events, handleEventSave, handleEventDelete, handleEventMove } =
+    useEventOperations(handleDialogClose);
+
+  const filteredEvents = useMemo(
+    () =>
+      filterVisibleEvents(
+        filterPastEvents(events, viewPreferences.showPastEvents),
+        calendarVisibility.hiddenCalendars,
+      ),
+    [
+      events,
+      viewPreferences.showPastEvents,
+      calendarVisibility.hiddenCalendars,
+    ],
   );
 
-  const transformedEvents = useMemo(() => {
-    if (!data?.events) return [];
+  const { enableScope, disableScope } = useHotkeysContext();
 
-    return data.events.map((event): CalendarEvent => {
-      const startDate = new Date(event.start);
-      let endDate = new Date(event.end);
+  useEffect(() => {
+    if (isEventDialogOpen) {
+      disableScope("calendar");
+    } else {
+      enableScope("calendar");
+    }
+  }, [isEventDialogOpen, enableScope, disableScope]);
 
-      if (event.allDay && endDate.getHours() === 0 && endDate.getMinutes() === 0 && endDate.getSeconds() === 0) {
-        const nextDayOfStart = addDays(new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()), 1);
-        if (endDate.getTime() === nextDayOfStart.getTime()) {
-          endDate = endOfDay(startDate);
-        } else {
-          endDate = endOfDay(subDays(endDate, 1));
-        }
+  return (
+    <div
+      className={cn(
+        "relative flex flex-col overflow-auto has-data-[slot=month-view]:flex-1",
+        className,
+      )}
+      style={
+        {
+          "--event-height": `${EventHeight}px`,
+          "--event-gap": `${EventGap}px`,
+          "--week-cells-height": `${WeekCellsHeight}px`,
+        } as React.CSSProperties
       }
+    >
+      <CalendarDndProvider onEventUpdate={handleEventMove}>
+        <CalendarHeader />
 
-      return {
-        id: event.id,
-        title: event.title,
-        description: event.description,
-        start: startDate,
-        end: endDate,
-        allDay: event.allDay,
-        color: event.colorId ? colorMap[event.colorId] || "sky" : "sky",
-        location: event.location,
-      };
-    });
-  }, [data]);
+        <div className="grow overflow-auto">
+          <CalendarContent
+            events={filteredEvents}
+            onEventSelect={handleEventSelect}
+            onEventCreate={() =>
+              toast.error("Event form is not wired up yet!", {
+                closeButton: false,
+              })
+            }
+          />
+        </div>
 
-  return <EventCalendar events={transformedEvents} className={className} />;
+        <EventDialog
+          event={selectedEvent}
+          isOpen={isEventDialogOpen}
+          onClose={handleDialogClose}
+          onSave={handleEventSave}
+          onDelete={handleEventDelete}
+        />
+      </CalendarDndProvider>
+      <Button
+        data-sidebar="trigger"
+        data-slot="sidebar-trigger"
+        data-side="right"
+        size="icon"
+        className={cn(
+          "group/sidebar-trigger absolute right-5 bottom-5 size-12 rounded-lg border border-border/50 bg-background text-foreground/50 shadow-md transition-all duration-300 hover:scale-[104%] hover:bg-background/70 hover:text-foreground/70 hover:shadow-lg dark:border-border/70 dark:bg-muted dark:text-foreground/80 dark:hover:brightness-110",
+          className,
+        )}
+        onClick={() => toggleRightSidebar()}
+      >
+        <Plus
+          className={cn("size-6 transition-transform duration-300", {
+            "rotate-45": isRightSidebarOpen,
+          })}
+          strokeWidth={1.75}
+          strokeLinecap="round"
+        />
+        <span className="sr-only">Toggle Sidebar</span>
+      </Button>
+    </div>
+  );
 }

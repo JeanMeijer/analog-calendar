@@ -1,0 +1,38 @@
+name: Feature Request
+description: Suggest a new feature or improvement for analog.now
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        💡 Thanks for helping improve analog.now! Please describe your feature idea clearly and simply.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: What would you like to see?
+      description: Describe the feature or enhancement you’d like to suggest.
+      placeholder: I’d like a way to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Why is this feature useful?
+      description: Tell us how this feature would help you or others.
+      placeholder: It would solve... or improve...
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Have you considered any alternatives?
+      description: Optional – share any workarounds or different ideas.
+      placeholder: I tried..., but it doesn't quite solve the issue.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context or visuals
+      description: Add any links, screenshots, or notes to help us understand.
+      placeholder: You can paste links, UI mockups, or references here.

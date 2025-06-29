@@ -4,30 +4,37 @@
   "private": true,
   "exports": {
     ".": "./src/root.ts",
-    "./trpc": "./src/trpc.ts"
+    "./trpc": "./src/trpc.ts",
+    "./providers/interfaces": "./src/providers/interfaces.ts"
   },
   "scripts": {
     "lint": "eslint ."
   },
   "peerDependencies": {
-    "@trpc/server": "^11.1.2",
-    "better-auth": "^1.2.8",
-    "next": "^15",
+    "@trpc/server": "^11.4.2",
+    "better-auth": "1.2.9-beta.8",
+    "next": "^15.3.2",
     "server-only": "^0.0.1",
     "superjson": "^2.2.2",
-    "zod": "^3.24.4"
+    "zod": "^3.25.12"
   },
   "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/env": "workspace:*",
-    "@repo/google-calendar": "workspace:*"
+    "@repo/temporal": "workspace:*",
+    "@repo/google-calendar": "workspace:*",
+    "@repo/google-tasks": "workspace:*",
+    "@upstash/ratelimit": "^2.0.5",
+    "@upstash/redis": "^1.35.0"
   },
   "devDependencies": {
+    "@microsoft/microsoft-graph-types": "^2.40.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20",
-    "eslint": "^9",
-    "typescript": "^5"
+    "@types/node": "^20.19.1",
+    "eslint": "^9.29.0",
+    "typescript": "^5.8.3"
   }
 }

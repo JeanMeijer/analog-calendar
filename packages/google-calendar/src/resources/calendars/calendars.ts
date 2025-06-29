@@ -1,6 +1,10 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+import { APIPromise } from "../../core/api-promise";
 import { APIResource } from "../../core/resource";
+import { buildHeaders } from "../../internal/headers";
+import { RequestOptions } from "../../internal/request-options";
+import { path } from "../../internal/utils/path";
 import * as ACLAPI from "./acl";
 import {
   ACL,
@@ -28,10 +32,6 @@ import {
   EventWatchParams,
   Events,
 } from "./events";
-import { APIPromise } from "../../core/api-promise";
-import { buildHeaders } from "../../internal/headers";
-import { RequestOptions } from "../../internal/request-options";
-import { path } from "../../internal/utils/path";
 
 export class Calendars extends APIResource {
   acl: ACLAPI.ACL = new ACLAPI.ACL(this._client);

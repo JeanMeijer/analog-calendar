@@ -9,15 +9,17 @@
   "scripts": {
     "lint": "eslint ."
   },
+  "peerDependencies": {
+    "zod": "^3.25.67"
+  },
   "dependencies": {
-    "@t3-oss/env-nextjs": "^0.13.4",
-    "zod": "^3.24.4"
+    "@t3-oss/env-nextjs": "^0.13.8"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20",
-    "eslint": "^9",
-    "typescript": "^5"
+    "@types/node": "^20.19.1",
+    "eslint": "^9.29.0",
+    "typescript": "^5.8.3"
   }
 }

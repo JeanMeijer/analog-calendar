@@ -1,9 +1,8 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { type GoogleCalendar } from "../client";
-
-import { type PromiseOrValue } from "../internal/types";
 import { APIResponseProps, defaultParseResponse } from "../internal/parse";
+import { type PromiseOrValue } from "../internal/types";
 
 /**
  * A subclass of `Promise` providing additional helper methods

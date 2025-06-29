@@ -1,17 +1,18 @@
 "use client";
 
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import NumberFlow from "@number-flow/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronRight } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronRight } from "lucide-react";
-import NumberFlow from "@number-flow/react";
-import { useForm } from "react-hook-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useTRPC } from "@/lib/trpc/client";
-import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -70,7 +71,7 @@ export function WaitlistForm({ className }: WaitlistFormProps) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-6 items-center justify-center w-full max-w-3xl mx-auto",
+        "mx-auto flex w-full max-w-3xl flex-col items-center justify-center gap-6",
         className,
       )}
     >
@@ -86,16 +87,16 @@ export function WaitlistForm({ className }: WaitlistFormProps) {
         </div>
       ) : (
         <form
-          className="flex flex-col sm:flex-row gap-3 w-full max-w-lg mx-auto"
+          className="mx-auto flex w-full max-w-lg flex-col gap-3 sm:flex-row"
           onSubmit={handleSubmit(joinWaitlist)}
         >
           <Input
             placeholder="example@0.email"
-            className="md:text-base text-base font-medium h-11 placeholder:text-muted-foreground placeholder:font-medium bg-white outline outline-neutral-200 w-full rounded-md px-4"
+            className="h-11 w-full rounded-md px-4 text-base font-medium outline outline-neutral-200 placeholder:font-medium placeholder:text-muted-foreground md:text-base"
             {...register("email")}
           />
           <Button
-            className="w-full sm:w-fit pl-4 pr-3 h-11 text-base"
+            className="h-11 w-full pr-3 pl-4 text-base sm:w-fit"
             type="submit"
           >
             Join Waitlist <ChevronRight className="h-5 w-5" />
@@ -103,10 +104,10 @@ export function WaitlistForm({ className }: WaitlistFormProps) {
         </form>
       )}
 
-      <div className="relative flex flex-row gap-2 items-center justify-center">
-        <span className="bg-green-600 dark:bg-green-400 size-2 rounded-full" />
-        <span className="bg-green-600 dark:bg-green-400 size-2 rounded-full blur-xs left-0 absolute" />
-        <span className="text-green-600 dark:text-green-400 text-sm sm:text-base">
+      <div className="relative flex flex-row items-center justify-center gap-2">
+        <span className="size-2 rounded-full bg-green-600 dark:bg-green-400" />
+        <span className="absolute left-0 size-2 rounded-full bg-green-600 blur-xs dark:bg-green-400" />
+        <span className="text-sm text-green-600 sm:text-base dark:text-green-400">
           <NumberFlow value={waitlist.count} /> people already joined
         </span>
       </div>

@@ -1,13 +1,15 @@
 import "server-only";
 import { cache, type ReactNode } from "react";
 import { headers } from "next/headers";
+import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import {
-  createTRPCOptionsProxy,
   TRPCQueryOptions,
+  createTRPCOptionsProxy,
 } from "@trpc/tanstack-react-query";
+
 import { appRouter, createContext } from "@repo/api";
+
 import { makeQueryClient } from "./query-client";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 // IMPORTANT: Create a stable getter for the query client that
 //            will return the same client during the same request.

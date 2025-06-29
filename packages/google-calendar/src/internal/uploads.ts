@@ -1,6 +1,6 @@
-import { type RequestOptions } from "./request-options";
-import type { FilePropertyBag, Fetch } from "./builtin-types";
 import type { GoogleCalendar } from "../client";
+import type { Fetch, FilePropertyBag } from "./builtin-types";
+import { type RequestOptions } from "./request-options";
 import { ReadableStreamFrom } from "./shims";
 
 export type BlobPart = string | ArrayBuffer | ArrayBufferView | Blob | DataView;

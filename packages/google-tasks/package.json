@@ -1,0 +1,14 @@
+{
+  "name": "@repo/google-tasks",
+  "version": "0.0.1-alpha.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.19.1",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,68 +1,242 @@
+import { Temporal } from "temporal-polyfill";
+
 import { GoogleCalendar } from "@repo/google-calendar";
+
+import { CALENDAR_DEFAULTS } from "../constants/calendar";
+import { CreateEventInput, UpdateEventInput } from "../schemas/events";
+import {
+  parseGoogleCalendarCalendarListEntry,
+  parseGoogleCalendarEvent,
+  toGoogleCalendarAttendeeResponseStatus,
+  toGoogleCalendarEvent,
+} from "./google-calendar/utils";
+import type { Calendar, CalendarEvent, CalendarProvider } from "./interfaces";
+import { ProviderError } from "./utils";
 
 interface GoogleCalendarProviderOptions {
   accessToken: string;
+  accountId: string;
 }
 
-export class GoogleCalendarProvider {
+export class GoogleCalendarProvider implements CalendarProvider {
+  public readonly providerId = "google" as const;
+  public readonly accountId: string;
   private client: GoogleCalendar;
 
-  constructor({ accessToken }: GoogleCalendarProviderOptions) {
+  constructor({ accessToken, accountId }: GoogleCalendarProviderOptions) {
+    this.accountId = accountId;
     this.client = new GoogleCalendar({
       accessToken,
     });
   }
 
-  async calendars() {
-    const { items } = await this.client.users.me.calendarList.list();
+  async calendars(): Promise<Calendar[]> {
+    return this.withErrorHandler("calendars", async () => {
+      const { items } = await this.client.users.me.calendarList.list();
 
-    return (
-      items?.map((calendar) => ({
-        id: calendar.id,
-        provider: "google",
-        name: calendar.summary,
-        primary: calendar.primary,
-      })) ?? []
-    );
+      if (!items) return [];
+
+      return items.map((calendar) =>
+        parseGoogleCalendarCalendarListEntry({
+          accountId: this.accountId,
+          entry: calendar,
+        }),
+      );
+    });
   }
 
-  async events(calendarId: string, timeMin?: string, timeMax?: string) {
-    const { items } = await this.client.calendars.events.list(calendarId, {
-      timeMin: timeMin || new Date().toISOString(),
-      timeMax: timeMax || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      singleEvents: true,
-      orderBy: "startTime",
-      maxResults: 250,
+  async createCalendar(
+    calendar: Omit<Calendar, "id" | "providerId">,
+  ): Promise<Calendar> {
+    return this.withErrorHandler("createCalendar", async () => {
+      const createdCalendar = await this.client.calendars.create({
+        summary: calendar.name,
+      });
+
+      return parseGoogleCalendarCalendarListEntry({
+        accountId: this.accountId,
+        entry: createdCalendar,
+      });
     });
+  }
 
-    return (
-      items?.map((event) => {
-        const isAllDay = !event.start?.dateTime;
+  async updateCalendar(
+    calendarId: string,
+    calendar: Partial<Calendar>,
+  ): Promise<Calendar> {
+    return this.withErrorHandler("updateCalendar", async () => {
+      const updatedCalendar = await this.client.calendars.update(calendarId, {
+        summary: calendar.name,
+      });
 
-        let start: string;
-        let end: string;
+      return parseGoogleCalendarCalendarListEntry({
+        accountId: this.accountId,
+        entry: updatedCalendar,
+      });
+    });
+  }
 
-        if (isAllDay) {
-          start = event.start?.date ? `${event.start.date}T00:00:00` : "";
-          end = event.end?.date ? `${event.end.date}T00:00:00` : "";
-        } else {
-          start = event.start?.dateTime || "";
-          end = event.end?.dateTime || "";
-        }
+  async deleteCalendar(calendarId: string): Promise<void> {
+    return this.withErrorHandler("deleteCalendar", async () => {
+      await this.client.calendars.delete(calendarId);
+    });
+  }
 
-        return {
-          id: event.id || "",
-          title: event.summary || "Untitled Event",
-          description: event.description,
-          start,
-          end,
-          allDay: isAllDay,
-          location: event.location,
-          status: event.status,
-          htmlLink: event.htmlLink,
-          colorId: event.colorId,
+  async events(
+    calendarId: string,
+    timeMin: Temporal.ZonedDateTime,
+    timeMax: Temporal.ZonedDateTime,
+  ): Promise<CalendarEvent[]> {
+    return this.withErrorHandler("events", async () => {
+      const { items } = await this.client.calendars.events.list(calendarId, {
+        timeMin: timeMin.withTimeZone("UTC").toInstant().toString(),
+        timeMax: timeMax.withTimeZone("UTC").toInstant().toString(),
+        singleEvents: CALENDAR_DEFAULTS.SINGLE_EVENTS,
+        orderBy: CALENDAR_DEFAULTS.ORDER_BY,
+        maxResults: CALENDAR_DEFAULTS.MAX_EVENTS_PER_CALENDAR,
+      });
+
+      return (
+        items?.map((event) =>
+          parseGoogleCalendarEvent({
+            calendarId,
+            accountId: this.accountId,
+            event,
+          }),
+        ) ?? []
+      );
+    });
+  }
+
+  async createEvent(
+    calendarId: string,
+    event: CreateEventInput,
+  ): Promise<CalendarEvent> {
+    return this.withErrorHandler("createEvent", async () => {
+      const createdEvent = await this.client.calendars.events.create(
+        calendarId,
+        toGoogleCalendarEvent(event),
+      );
+
+      return parseGoogleCalendarEvent({
+        calendarId,
+        accountId: this.accountId,
+        event: createdEvent,
+      });
+    });
+  }
+
+  async updateEvent(
+    calendarId: string,
+    eventId: string,
+    event: UpdateEventInput,
+  ): Promise<CalendarEvent> {
+    return this.withErrorHandler("updateEvent", async () => {
+      const existingEvent = await this.client.calendars.events.retrieve(
+        eventId,
+        {
+          calendarId,
+        },
+      );
+
+      const updatedEvent = await this.client.calendars.events.update(eventId, {
+        ...existingEvent,
+        calendarId,
+        ...toGoogleCalendarEvent(event),
+      });
+
+      return parseGoogleCalendarEvent({
+        calendarId,
+        accountId: this.accountId,
+        event: updatedEvent,
+      });
+    });
+  }
+
+  async deleteEvent(calendarId: string, eventId: string): Promise<void> {
+    return this.withErrorHandler("deleteEvent", async () => {
+      await this.client.calendars.events.delete(eventId, { calendarId });
+    });
+  }
+
+  async acceptEvent(calendarId: string, eventId: string): Promise<void> {
+    return this.withErrorHandler("acceptEvent", async () => {
+      const event = await this.client.calendars.events.retrieve(eventId, {
+        calendarId,
+      });
+
+      const attendees = event.attendees ?? [];
+      const selfIndex = attendees.findIndex((a) => a.self);
+
+      if (selfIndex >= 0) {
+        attendees[selfIndex] = {
+          ...attendees[selfIndex],
+          responseStatus: "accepted",
         };
-      }) ?? []
-    );
+      } else {
+        attendees.push({ self: true, responseStatus: "accepted" });
+      }
+
+      await this.client.calendars.events.update(eventId, {
+        ...event,
+        calendarId,
+        attendees,
+        sendUpdates: "all",
+      });
+    });
+  }
+
+  async responseToEvent(
+    calendarId: string,
+    eventId: string,
+    response: {
+      status: "accepted" | "tentative" | "declined";
+      comment?: string;
+    },
+  ): Promise<void> {
+    return this.withErrorHandler("responseToEvent", async () => {
+      const event = await this.client.calendars.events.retrieve(eventId, {
+        calendarId,
+      });
+
+      if (!event.attendees) {
+        throw new Error("Event has no attendees");
+      }
+
+      if (response.comment) {
+        throw new Error("Comment is not supported");
+      }
+
+      const selfIndex = event.attendees.findIndex((attendee) => attendee.self);
+
+      if (selfIndex === -1) {
+        throw new Error("Event has no self attendee");
+      }
+
+      event.attendees[selfIndex] = {
+        ...event.attendees[selfIndex],
+        responseStatus: toGoogleCalendarAttendeeResponseStatus(response.status),
+      };
+
+      await this.client.calendars.events.update(eventId, {
+        ...event,
+        calendarId,
+        sendUpdates: "all",
+      });
+    });
+  }
+
+  private async withErrorHandler<T>(
+    operation: string,
+    fn: () => Promise<T> | T,
+    context?: Record<string, unknown>,
+  ): Promise<T> {
+    try {
+      return await Promise.resolve(fn());
+    } catch (error: unknown) {
+      console.error(`Failed to ${operation}:`, error);
+
+      throw new ProviderError(error as Error, operation, context);
+    }
   }
 }

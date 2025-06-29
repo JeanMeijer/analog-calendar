@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
+import withSimpleAnalytics from "@simpleanalytics/next/plugin";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async redirects() {
+    return [
+      {
+        source: "/discord",
+        destination: "https://discord.gg/K3AsABDKUm",
+        permanent: false,
+      },
+    ];
+  },
 };
 
-export default nextConfig;
+export default withSimpleAnalytics(nextConfig);

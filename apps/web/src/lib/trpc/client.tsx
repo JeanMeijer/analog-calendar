@@ -1,17 +1,23 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import {
+  PersistQueryClientProvider,
+  removeOldestQuery,
+} from "@tanstack/react-query-persist-client";
 import {
   createTRPCClient,
   httpBatchStreamLink,
   loggerLink,
 } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import superjson from "superjson";
+
 import type { AppRouter } from "@repo/api";
 import { env } from "@repo/env/client";
+
 import { getQueryClient } from "./query-client";
+import { superjson } from "./superjson";
 
 export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
 
@@ -26,6 +32,14 @@ function getUrl() {
   return `${base}/api/trpc`;
 }
 
+const persister = createSyncStoragePersister({
+  storage: typeof window !== "undefined" ? window.localStorage : null,
+  throttleTime: 1000,
+  retry: removeOldestQuery,
+  serialize: (data) => superjson.stringify(data),
+  deserialize: (data) => superjson.parse(data),
+});
+
 interface TRPCReactProviderProps {
   children: ReactNode;
 }
@@ -36,6 +50,7 @@ export function TRPCReactProvider(props: Readonly<TRPCReactProviderProps>) {
   //       suspend because React will throw away the client on the initial
   //       render if it suspends and there is no boundary
   const queryClient = getQueryClient();
+
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links: [
@@ -59,10 +74,13 @@ export function TRPCReactProvider(props: Readonly<TRPCReactProviderProps>) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister }}
+    >
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
         {props.children}
       </TRPCProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
