@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSidebarWithSide } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { CreateEventInput } from "./create-event-input";
 
 interface CalendarViewProps {
   className?: string;
@@ -107,6 +108,9 @@ export function CalendarView({ className }: CalendarViewProps) {
           onDelete={handleEventDelete}
         />
       </CalendarDndProvider>
+
+      <CreateEventInput />
+
       <Button
         data-sidebar="trigger"
         data-slot="sidebar-trigger"

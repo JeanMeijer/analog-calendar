@@ -1,16 +1,15 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useState } from "react";
 import Document from "@tiptap/extension-document";
 import Mention from "@tiptap/extension-mention";
-import Text from "@tiptap/extension-text";
 import Paragraph from "@tiptap/extension-paragraph";
-
-import createEventInputSuggestions from "./create-event-input-suggestions";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-
+import Text from "@tiptap/extension-text";
+import { EditorContent, useEditor } from "@tiptap/react";
 import { AnimatePresence, motion } from "motion/react";
+
+import { cn } from "@/lib/utils";
+import createEventInputSuggestions from "./create-event-input-suggestions";
 
 export function CreateEventInput() {
   const [isEmpty, setIsEmpty] = useState(true);
@@ -64,9 +63,8 @@ export function CreateEventInput() {
     const sanitizedContent = content?.replace(/\s+$/, "");
 
     const mentions = paragraph?.content?.filter(
-      (node) => node.type === "mention"
+      (node) => node.type === "mention",
     );
-
 
     console.log({ content: sanitizedContent, mentions });
     editor?.commands.clearContent();
@@ -80,7 +78,10 @@ export function CreateEventInput() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ type: "spring", duration: 0.4 }}
-      className="relative"
+      className={cn(
+        "absolute bottom-5 left-1/2 z-50 -translate-x-1/2",
+        "w-96 max-w-full",
+      )}
     >
       <AnimatePresence>{isEmpty && <Placeholder />}</AnimatePresence>
 
@@ -88,11 +89,11 @@ export function CreateEventInput() {
         editor={editor}
         placeholder="Sales meeting at @22:00"
         className={cn(
-          "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-          "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-          "min-h-[32px] bg-input rounded-sm placeholder:text-muted-foreground p-2",
-          "event-editor-content"
+          "flex items-center pl-2",
+          "h-10 w-full min-w-0",
+          "rounded-sm",
+          "border bg-sidebar",
+          "event-editor-content",
         )}
       />
     </motion.div>
@@ -102,11 +103,11 @@ export function CreateEventInput() {
 const Placeholder = () => {
   return (
     <motion.div
-      initial={{ opacity: 0, filter: "blur(2px)", x: -2 }}
-      animate={{ opacity: 1, filter: "blur(0px)", x: 0 }}
-      exit={{ opacity: 0, filter: "blur(2px)", x: -2 }}
-      transition={{ type: "spring", duration: 0.4 }}
-      className="text-muted-foreground text-sm absolute top-0 left-px p-2 pointer-events-none"
+      initial={{ opacity: 0, filter: "blur(2px)" }}
+      animate={{ opacity: 1, filter: "blur(0px)" }}
+      exit={{ opacity: 0, filter: "blur(2px)" }}
+      transition={{ type: "spring", duration: 0.2 }}
+      className="pointer-events-none absolute top-1/2 -translate-y-1/2 p-2 text-sm text-muted-foreground"
     >
       Sales meeting at @22:00
     </motion.div>
