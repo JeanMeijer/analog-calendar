@@ -7,9 +7,18 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { AnimatePresence, motion } from "motion/react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import createEventInputSuggestions from "./create-event-input-suggestions";
+
+type Mention = {
+  type: "mention";
+  attrs: {
+    id: "mention-date" | "mention-time" | "mention-duration";
+    label: string; // the value, might be a date, time, or duration
+  };
+};
 
 export function CreateEventInput() {
   const [isEmpty, setIsEmpty] = useState(true);
@@ -66,8 +75,49 @@ export function CreateEventInput() {
       (node) => node.type === "mention",
     );
 
-    console.log({ content: sanitizedContent, mentions });
+    // handle empty content
+    if (!sanitizedContent || !mentions) {
+      toast.error("Please enter a title and a date, time, or duration");
+      return;
+    }
+
+    const description = createEventDescription(
+      sanitizedContent,
+      mentions as Mention[],
+    );
+
+    toast.success("Event created", {
+      description,
+    });
+
     editor?.commands.clearContent();
+    setIsEmpty(true);
+  };
+
+  // based on the title and mentions, create a description
+  // like this:
+  // "Sales meeting at 22:00 on May 1st 2025"
+  // if shorter than a week we can use the day only, like "Sales meeting at 22:00 on Tuesday"
+  const createEventDescription = (title: string, mentions: Mention[]) => {
+    const date = mentions.find(
+      (mention) => mention.attrs.id === "mention-date",
+    );
+    const time = mentions.find(
+      (mention) => mention.attrs.id === "mention-time",
+    );
+    // skip duration for now
+    const duration = mentions.find(
+      (mention) => mention.attrs.id === "mention-duration",
+    );
+
+    const prefix = date?.attrs.label === "tomorrow" ? "" : "on ";
+    const description = `${title} at ${time?.attrs.label} ${prefix}${date?.attrs.label}`;
+
+    if (description.length < 20) {
+      return `${title} at ${time?.attrs.label} ${prefix}${date?.attrs.label.split(" ")[0]}`;
+    }
+
+    return description;
   };
 
   if (!editor) return null;

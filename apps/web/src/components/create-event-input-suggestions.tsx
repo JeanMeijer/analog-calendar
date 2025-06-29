@@ -1,5 +1,5 @@
-import { ReactRenderer } from "@tiptap/react";
 import { type MentionOptions } from "@tiptap/extension-mention";
+import { ReactRenderer } from "@tiptap/react";
 import tippy, { Instance, Props } from "tippy.js";
 
 import { generateDateSuggestions } from "@/lib/event-input";
