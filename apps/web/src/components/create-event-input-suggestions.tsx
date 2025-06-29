@@ -2,12 +2,13 @@ import { ReactRenderer } from "@tiptap/react";
 import { type MentionOptions } from "@tiptap/extension-mention";
 import tippy, { Instance, Props } from "tippy.js";
 
+import { generateDateSuggestions } from "@/lib/event-input";
 import TimeSelector from "./time-selector";
 
 type MentionSuggestion = MentionOptions["suggestion"];
 
 type SuggestionItem = {
-  type: "time" | "duration";
+  type: "time" | "duration" | "date";
   label: string;
   value: string;
 };
@@ -42,13 +43,20 @@ export default {
       { type: "duration", label: "4h", value: "4h" },
     ];
 
+    const dateSuggestions = generateDateSuggestions(query);
+    suggestions.push(...dateSuggestions);
+
     return suggestions
-      .filter((item) =>
-        item.label.toLowerCase().startsWith(query.toLowerCase())
-      )
+      .filter((item) => {
+        if (item.type === "date") {
+          return true;
+        }
+        return item.label.toLowerCase().startsWith(query.toLowerCase());
+      })
       .reduce((acc, item) => {
         const sameTypeCount = acc.filter((i) => i.type === item.type).length;
-        if (sameTypeCount < 5) {
+        const maxCount = item.type === "date" ? 3 : 5;
+        if (sameTypeCount < maxCount) {
           acc.push(item);
         }
         return acc;
