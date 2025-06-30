@@ -179,20 +179,33 @@ export function EventDialog({
       return;
     }
 
+    const timeZone =
+      event?.start instanceof Temporal.ZonedDateTime
+        ? event.start.timeZoneId
+        : settings.defaultTimeZone;
+
     onSave({
       id: event?.id || "",
       title: eventTitle || "",
       description,
       start: allDay
-        ? Temporal.PlainDate.from(start.toISOString().split("T")[0]!)
+        ? Temporal.PlainDate.from({
+          year: start.getFullYear(),
+          month: start.getMonth() + 1,
+          day: start.getDate(),
+        })
         : Temporal.Instant.from(start.toISOString()).toZonedDateTimeISO(
-            (event?.start as Temporal.ZonedDateTime).timeZoneId,
-          ),
+          timeZone,
+        ),
       end: allDay
-        ? Temporal.PlainDate.from(end.toISOString().split("T")[0]!)
+        ? Temporal.PlainDate.from({
+          year: end.getFullYear(),
+          month: end.getMonth() + 1,
+          day: end.getDate(),
+        })
         : Temporal.Instant.from(end.toISOString()).toZonedDateTimeISO(
-            (event?.end as Temporal.ZonedDateTime).timeZoneId,
-          ),
+          timeZone,
+        ),
       allDay,
       location,
       color: event?.color,

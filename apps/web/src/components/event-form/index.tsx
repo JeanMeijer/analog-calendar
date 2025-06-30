@@ -38,7 +38,7 @@ function EventForm() {
   const form = useAppForm({
     defaultValues: {
       ...defaultFormOptions.defaultValues,
-      accountId: accounts?.find((a) => !a.email)?.id ?? "",
+      accountId: accounts?.find((a) => a.email !== "")?.id ?? "",
     },
     validators: defaultFormOptions.validators,
     onSubmit: ({ value }) => {
