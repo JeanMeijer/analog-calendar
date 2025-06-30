@@ -2,7 +2,7 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError } from "better-auth/api";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@repo/db";
 import { account, user } from "@repo/db/schema";
@@ -82,12 +82,21 @@ export const auth = betterAuth({
           }
 
           await db.transaction(async (tx) => {
+            const existing = await tx.query.account.findFirst({
+              where: (table, { and, eq }) =>
+                and(
+                  eq(table.userId, _account.userId),
+                  eq(table.signInEnabled, true),
+                ),
+            });
+
             await tx
               .update(account)
               .set({
                 name: info.user.name,
                 email: info.user.email ?? undefined,
                 image: info.user.image,
+                signInEnabled: existing ? false : true,
               })
               .where(eq(account.id, _account.id));
 

@@ -42,6 +42,9 @@ export const account = pgTable("account", {
   accessTokenExpiresAt: timestamp(),
   refreshTokenExpiresAt: timestamp(),
   scope: text(),
+  signInEnabled: boolean()
+    .$defaultFn(() => false)
+    .notNull(),
   password: text(),
   createdAt: timestamp().notNull(),
   updatedAt: timestamp().notNull(),

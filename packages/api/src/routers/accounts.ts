@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { auth } from "@repo/auth/server";
-import { user } from "@repo/db/schema";
+import { account as accountTable, user } from "@repo/db/schema";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { getAccounts, getActiveAccount } from "../utils/accounts";
@@ -19,6 +19,7 @@ export const accountsRouter = createTRPCRouter({
         name: account.name,
         email: account.email,
         image: account.image,
+        signInEnabled: account.signInEnabled,
         createdAt: account.createdAt,
         updatedAt: account.updatedAt,
       })),
@@ -53,6 +54,7 @@ export const accountsRouter = createTRPCRouter({
         name: account.name,
         email: account.email,
         image: account.image,
+        signInEnabled: account.signInEnabled,
         createdAt: account.createdAt,
         updatedAt: account.updatedAt,
       },
@@ -66,6 +68,18 @@ export const accountsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const signInAccounts = await ctx.db.query.account.findMany({
+        where: (table, { and, eq }) =>
+          and(eq(table.userId, ctx.user.id), eq(table.signInEnabled, true)),
+      });
+
+      if (signInAccounts.length === 1 && signInAccounts[0]?.id === input.id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "At least one account must allow sign in",
+        });
+      }
+
       await auth.api.unlinkAccount({
         body: {
           accountId: input.id,
@@ -82,5 +96,68 @@ export const accountsRouter = createTRPCRouter({
           .set({ defaultAccountId: null })
           .where(eq(user.id, ctx.user.id));
       }
+    }),
+  enableSignIn: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const found = await ctx.db.query.account.findFirst({
+        where: (table, { and, eq }) =>
+          and(eq(table.id, input.id), eq(table.userId, ctx.user.id)),
+      });
+
+      if (!found) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Account not found",
+        });
+      }
+
+      if (!["google", "microsoft"].includes(found.providerId)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Provider not supported for sign in",
+        });
+      }
+
+      await ctx.db
+        .update(accountTable)
+        .set({ signInEnabled: true })
+        .where(eq(accountTable.id, input.id));
+
+      return { success: true };
+    }),
+  disableSignIn: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const account = await ctx.db.query.account.findFirst({
+        where: (table, { and, eq }) =>
+          and(eq(table.id, input.id), eq(table.userId, ctx.user.id)),
+      });
+
+      if (!account) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Account not found",
+        });
+      }
+
+      const signInAccounts = await ctx.db.query.account.findMany({
+        where: (table, { and, eq }) =>
+          and(eq(table.userId, ctx.user.id), eq(table.signInEnabled, true)),
+      });
+
+      if (signInAccounts.length === 1 && signInAccounts[0].id === account.id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "At least one account must allow sign in",
+        });
+      }
+
+      await ctx.db
+        .update(accountTable)
+        .set({ signInEnabled: false })
+        .where(eq(accountTable.id, input.id));
+
+      return { success: true };
     }),
 });
