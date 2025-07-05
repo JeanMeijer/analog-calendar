@@ -49,6 +49,31 @@ export const auth = betterAuth({
         required: false,
         input: false,
       },
+      timeZone: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+      locale: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+      dateFormat: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+      weekStartsOn: {
+        type: "number",
+        required: false,
+        input: false,
+      },
+      use24Hour: {
+        type: "boolean",
+        required: false,
+        input: false,
+      },
     },
   },
   databaseHooks: {
@@ -57,6 +82,29 @@ export const auth = betterAuth({
       // pass additional fields before account creation
       create: {
         after: createProviderHandler,
+      },
+    },
+    user: {
+      create: {
+        after: async (u, c) => {
+          const query = (c?.query ?? {}) as Record<string, any>;
+          await c?.context.internalAdapter.updateUser(
+            u.id,
+            {
+              timeZone: query.timeZone,
+              locale: query.locale,
+              dateFormat: query.dateFormat,
+              weekStartsOn: query.weekStartsOn
+                ? Number(query.weekStartsOn)
+                : undefined,
+              use24Hour:
+                query.use24Hour !== undefined
+                  ? query.use24Hour === "true" || query.use24Hour === true
+                  : undefined,
+            },
+            c,
+          );
+        },
       },
     },
   },

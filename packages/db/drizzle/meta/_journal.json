@@ -36,6 +36,20 @@
       "when": 1751332331486,
       "tag": "0004_wet_lady_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1751446294000,
+      "tag": "0005_nimble_albatross",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1751454011170,
+      "tag": "0006_familiar_toro",
+      "breakpoints": true
     }
   ]
 }

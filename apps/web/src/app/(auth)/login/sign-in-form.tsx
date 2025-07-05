@@ -15,6 +15,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { providers, type ProviderId } from "@/lib/constants";
+import {
+  getBrowserDateFormat,
+  getBrowserLocale,
+  getBrowserTimezone,
+  getWeekStartsOn,
+  uses24HourClock,
+} from "@/lib/localization";
 import { cn } from "@/lib/utils";
 
 interface SignInFormProps {
@@ -29,6 +36,13 @@ export function SignInForm({ redirectUrl = "/calendar" }: SignInFormProps) {
       {
         provider: providerId,
         callbackURL: redirectUrl,
+        query: {
+          timeZone: getBrowserTimezone(),
+          locale: getBrowserLocale()[0],
+          dateFormat: getBrowserDateFormat(),
+          weekStartsOn: getWeekStartsOn(),
+          use24Hour: uses24HourClock(),
+        },
       },
       {
         onRequest: () => {
