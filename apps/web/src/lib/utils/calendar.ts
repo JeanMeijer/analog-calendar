@@ -16,7 +16,7 @@ export type CreateDraftEventOptions = Omit<DraftEvent, "id" | "type"> &
 export function createDraftEvent(options: CreateDraftEventOptions): DraftEvent {
   return {
     ...options,
-    id: `draft-${crypto.randomUUID()}`,
+    id: createEventId(),
     type: "draft",
   };
 }
@@ -25,4 +25,8 @@ export function isDraftEvent(
   event: CalendarEvent | DraftEvent,
 ): event is DraftEvent {
   return "type" in event && event.type === "draft";
+}
+
+export function createEventId() {
+  return `${crypto.randomUUID()}`.replace(/-/g, "");
 }

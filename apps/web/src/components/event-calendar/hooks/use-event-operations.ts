@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useOptimistic,
-  useTransition,
-} from "react";
+import { useCallback, useMemo, useOptimistic, useTransition } from "react";
 import { useAtom } from "jotai";
 import * as R from "remeda";
 
@@ -14,7 +8,6 @@ import { SelectedEvents, selectedEventsAtom } from "@/atoms";
 import { DraftEvent } from "@/lib/interfaces";
 import { CalendarEvent } from "../types";
 import {
-  generateEventId,
   showEventAddedToast,
   showEventDeletedToast,
   showEventMovedToast,
@@ -24,7 +17,6 @@ import { useCalendar } from "./use-calendar-actions";
 
 // Types for optimistic reducer actions
 type OptimisticAction =
-  | { type: "add"; event: CalendarEvent }
   | { type: "update"; event: CalendarEvent }
   | { type: "delete"; eventId: string };
 
@@ -39,56 +31,35 @@ export function useEventOperations(onOperationComplete?: () => void) {
   const [optimisticEvents, applyOptimistic] = useOptimistic(
     events,
     (state: CalendarEvent[], action: OptimisticAction) => {
-      switch (action.type) {
-        case "add": {
-          // Find correct insertion point (binary-search) to keep list sorted chronologically
-          const insertIdx = R.sortedIndexWith(
-            state,
-            (item) => compareTemporal(item.start, action.event.start) < 0,
-          );
-
-          return [
-            ...state.slice(0, insertIdx),
-            action.event,
-            ...state.slice(insertIdx),
-          ];
-        }
-        case "update": {
-          // Remove old instance, re-insert respecting sort order
-          const withoutOld = state.filter((evt) => evt.id !== action.event.id);
-          const insertIdx = R.sortedIndexWith(
-            withoutOld,
-            (item) => compareTemporal(item.start, action.event.start) < 0,
-          );
-          return [
-            ...withoutOld.slice(0, insertIdx),
-            { ...action.event },
-            ...withoutOld.slice(insertIdx),
-          ];
-        }
-        case "delete": {
-          return state.filter((evt) => evt.id !== action.eventId);
-        }
-        default:
-          return state;
+      if (action.type === "delete") {
+        return state.filter((e) => e.id !== action.eventId);
       }
+
+      const withoutEvent = state.filter((e) => e.id !== action.event.id);
+
+      // Remove old instance, re-insert respecting sort order
+      const insertIdx = R.sortedIndexWith(
+        withoutEvent,
+        (item) => compareTemporal(item.start, action.event.start) < 0,
+      );
+
+      return [
+        ...withoutEvent.slice(0, insertIdx),
+        { ...action.event },
+        ...withoutEvent.slice(insertIdx),
+      ];
     },
   );
 
   const handleEventSave = useCallback(
     (event: CalendarEvent) => {
-      if (event.id.startsWith("draft-")) {
-        const eventWithId = { ...event, id: generateEventId() };
+      const exists = optimisticEvents.find((e) => e.id === event.id);
 
-        // Optimistically add event to UI
-        startTransition(() =>
-          applyOptimistic({ type: "add", event: eventWithId }),
-        );
+      if (!exists) {
+        startTransition(() => applyOptimistic({ type: "update", event }));
 
-        createEvent({
-          ...eventWithId,
-        });
-        showEventAddedToast(eventWithId);
+        createEvent(event);
+        showEventAddedToast(event);
         onOperationComplete?.();
         return;
       }
@@ -105,7 +76,7 @@ export function useEventOperations(onOperationComplete?: () => void) {
       applyOptimistic,
       createEvent,
       onOperationComplete,
-      startTransition,
+      optimisticEvents,
       updateEvent,
     ],
   );

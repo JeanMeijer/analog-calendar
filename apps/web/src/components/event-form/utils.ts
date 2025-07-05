@@ -2,7 +2,7 @@ import { Temporal } from "temporal-polyfill";
 
 import { CalendarSettings } from "@/atoms/calendar-settings";
 import { Calendar, CalendarEvent, DraftEvent } from "@/lib/interfaces";
-import { roundTo15Minutes } from "@/lib/utils/calendar";
+import { createEventId, roundTo15Minutes } from "@/lib/utils/calendar";
 import { FormValues } from "./form";
 
 interface CreateDefaultEvent {
@@ -133,7 +133,7 @@ export function parseCalendarEvent({
       accountId: event.accountId ?? "",
       calendarId: event.calendarId ?? "",
     },
-    providerId: event.providerId as "google" | "microsoft",
+    providerId: event.providerId,
   };
 
   return formValues;
@@ -152,13 +152,13 @@ export function toCalendarEvent({
 }: ToCalendarEvent): CalendarEvent {
   return {
     ...event,
-    id: event?.id ?? `draft-${crypto.randomUUID()}`,
+    id: event?.id ?? createEventId(),
     title: values.title,
     description: values.description,
     allDay: values.isAllDay,
     calendarId: values.calendar.calendarId,
     accountId: values.calendar.accountId,
-    providerId: values.providerId as "google" | "microsoft",
+    providerId: values.providerId,
     start: values.isAllDay ? values.start.toPlainDate() : values.start,
     end: values.isAllDay ? values.end.toPlainDate() : values.end,
     color: calendar?.color ?? undefined,

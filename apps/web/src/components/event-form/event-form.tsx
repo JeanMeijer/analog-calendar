@@ -32,16 +32,18 @@ import { formSchema, useAppForm } from "./form";
 import { RepeatSelect } from "./repeat-select";
 
 interface EventFormProps {
-  event?: CalendarEvent | DraftEvent;
+  selectedEvent?: CalendarEvent | DraftEvent;
   handleEventSave: (event: CalendarEvent) => void;
 }
 
-export function EventForm({ event, handleEventSave }: EventFormProps) {
+export function EventForm({ selectedEvent, handleEventSave }: EventFormProps) {
   const settings = useCalendarSettings();
-  const disabled = event?.readOnly;
 
   const trpc = useTRPC();
   const query = useQuery(trpc.calendars.list.queryOptions());
+
+  const [event, setEvent] = React.useState(selectedEvent);
+  const disabled = event?.readOnly;
 
   const defaultCalendar = React.useMemo(() => {
     return query.data?.accounts
@@ -71,8 +73,7 @@ export function EventForm({ event, handleEventSave }: EventFormProps) {
         return;
       }
 
-      const calendarEvent = toCalendarEvent({ values: value, event, calendar });
-      handleEventSave(calendarEvent);
+      handleEventSave(toCalendarEvent({ values: value, event, calendar }));
     },
     listeners: {
       onBlur: async ({ formApi }) => {
@@ -86,8 +87,15 @@ export function EventForm({ event, handleEventSave }: EventFormProps) {
   });
 
   React.useEffect(() => {
+    // If the form is modified and the event changes, keep the modified values
+    if (form.state.isDirty && selectedEvent?.id === event?.id) {
+      return;
+    }
+
+    setEvent(selectedEvent);
+
     form.reset();
-  }, [event, form]);
+  }, [selectedEvent, event, form]);
 
   return (
     <form

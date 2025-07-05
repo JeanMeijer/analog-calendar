@@ -22,7 +22,10 @@ export function RightSidebar({
     <Sidebar {...props}>
       <SidebarRail minSidebarWidth={minSidebarWidth} />
       <SidebarContent className="pr-0.5">
-        <EventForm event={selectedEvent} handleEventSave={handleEventSave} />
+        <EventForm
+          selectedEvent={selectedEvent}
+          handleEventSave={handleEventSave}
+        />
       </SidebarContent>
     </Sidebar>
   );

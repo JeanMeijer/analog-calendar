@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { toInstant } from "@repo/temporal";
 
+import { CalendarEvent } from "../providers/interfaces";
 import {
   createEventInputSchema,
   updateEventInputSchema,
@@ -52,7 +53,7 @@ export const eventsRouter = createTRPCRouter({
         }),
       );
 
-      const events = allEvents
+      const events: CalendarEvent[] = allEvents
         .flat()
         .map(
           (v) => [v, toInstant({ value: v.start, timeZone: "UTC" })] as const,
@@ -62,7 +63,6 @@ export const eventsRouter = createTRPCRouter({
 
       return { events };
     }),
-
   create: calendarProcedure
     .input(createEventInputSchema)
     .mutation(async ({ ctx, input }) => {
@@ -88,9 +88,7 @@ export const eventsRouter = createTRPCRouter({
         });
       }
 
-      const event = await provider.client.createEvent(calendar, {
-        ...input,
-      });
+      const event = await provider.client.createEvent(calendar, input);
 
       return { event };
     }),
