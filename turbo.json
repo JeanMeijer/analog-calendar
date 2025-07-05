@@ -17,7 +17,9 @@
         "SIMPLE_ANALYTICS_HOSTNAME",
         "NEXT_PUBLIC_SIMPLE_ANALYTICS_HOSTNAME",
         "MICROSOFT_CLIENT_ID",
-        "MICROSOFT_CLIENT_SECRET"
+        "MICROSOFT_CLIENT_SECRET",
+        "ZOOM_CLIENT_ID",
+        "ZOOM_CLIENT_SECRET"
       ],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
@@ -37,7 +39,9 @@
         "SIMPLE_ANALYTICS_HOSTNAME",
         "NEXT_PUBLIC_SIMPLE_ANALYTICS_HOSTNAME",
         "MICROSOFT_CLIENT_ID",
-        "MICROSOFT_CLIENT_SECRET"
+        "MICROSOFT_CLIENT_SECRET",
+        "ZOOM_CLIENT_ID",
+        "ZOOM_CLIENT_SECRET"
       ]
     },
     "lint": {

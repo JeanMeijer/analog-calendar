@@ -36,6 +36,7 @@ export interface CalendarEvent {
   accountId: string;
   calendarId: string;
   metadata?: Record<string, unknown>;
+  conferenceData?: Conference;
 }
 
 export interface Attendee {
@@ -84,4 +85,45 @@ export interface CalendarProvider {
       comment?: string;
     },
   ): Promise<void>;
+}
+
+export interface ConferencingProvider {
+  providerId: "zoom" | "google";
+  createConferencing(
+    agenda: string,
+    startTime: string,
+    endTime: string,
+    timeZone?: string,
+    calendarId?: string,
+    eventId?: string,
+  ): Promise<Conference>;
+}
+
+export interface Conference {
+  /** Provider-specific meeting identifier (e.g. Google Meet code, Zoom UUID). */
+  id?: string;
+
+  /** Human-friendly provider or meeting name (e.g. "Google Meet", "Teams"). */
+  name?: string;
+
+  /** Primary join URL for participants (video URL). */
+  joinUrl?: string;
+
+  /** Host-only URL when the provider differentiates (e.g. Zoom start_url). */
+  hostUrl?: string;
+
+  /** Meeting code or numeric ID displayed to users. */
+  meetingCode?: string;
+
+  /** Password / pass-code if required to join. */
+  password?: string;
+
+  /** One or more dial-in phone numbers (E.164 / plain). */
+  phoneNumbers?: string[];
+
+  /** Additional free-form notes such as SIP information. */
+  notes?: string;
+
+  /** Provider-specific extra fields preserved for debugging / extensions. */
+  extra?: Record<string, unknown>;
 }

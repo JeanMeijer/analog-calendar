@@ -85,20 +85,23 @@ export function parseGoogleCalendarEvent({
     accountId,
     calendarId: calendar.id,
     readOnly: calendar.readOnly,
+    conferenceData: parseGoogleCalendarConferenceData(event.conferenceData),
   };
 }
 
 export function toGoogleCalendarEvent(
   event: CreateEventInput | UpdateEventInput,
 ): GoogleCalendarEventCreateParams {
-  return {
+  const result: GoogleCalendarEventCreateParams = {
     ...("id" in event ? { id: event.id } : {}),
+    start: toGoogleCalendarDate(event.start),
+    end: toGoogleCalendarDate(event.end),
     summary: event.title,
     description: event.description,
     location: event.location,
-    start: toGoogleCalendarDate(event.start),
-    end: toGoogleCalendarDate(event.end),
   };
+
+  return result;
 }
 
 interface ParsedGoogleCalendarCalendarListEntryOptions {
@@ -162,6 +165,40 @@ function parseGoogleCalendarAttendeeType(
   }
 
   return "required";
+}
+
+function parseGoogleCalendarConferenceData(
+  conferenceData: GoogleCalendarEvent["conferenceData"],
+): CalendarEvent["conferenceData"] {
+  if (!conferenceData?.entryPoints?.length) {
+    return undefined;
+  }
+
+  const videoEntry = conferenceData.entryPoints.find(
+    (e) => e.entryPointType === "video" && e.uri,
+  );
+
+  const phoneNumbers = conferenceData.entryPoints
+    .filter((e) => e.entryPointType === "phone" && e.uri)
+    .map((e) => e.uri as string);
+
+  if (!videoEntry) {
+    return undefined;
+  }
+
+  return {
+    id: conferenceData.conferenceId,
+    name: conferenceData.conferenceSolution?.name ?? "Google Meet",
+    joinUrl: videoEntry.uri!,
+    meetingCode:
+      videoEntry.meetingCode ??
+      videoEntry.passcode ??
+      videoEntry.password ??
+      "",
+    phoneNumbers: phoneNumbers.length ? phoneNumbers : undefined,
+    password:
+      videoEntry.passcode ?? videoEntry.password ?? videoEntry.meetingCode,
+  };
 }
 
 export function parseGoogleCalendarAttendee(

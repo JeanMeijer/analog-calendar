@@ -128,6 +128,7 @@ export function parseMicrosoftEvent({
     accountId,
     calendarId: calendar.id,
     readOnly: calendar.readOnly,
+    conferenceData: parseMicrosoftConferenceData(event),
     metadata: {
       ...(event.originalStartTimeZone
         ? {
@@ -156,7 +157,7 @@ export function parseMicrosoftEvent({
 export function toMicrosoftEvent(event: CreateEventInput | UpdateEventInput) {
   const metadata = event.metadata as MicrosoftEventMetadata | undefined;
 
-  return {
+  const payload: Record<string, unknown> = {
     subject: event.title,
     body: event.description
       ? { contentType: "text", content: event.description }
@@ -172,6 +173,14 @@ export function toMicrosoftEvent(event: CreateEventInput | UpdateEventInput) {
     isAllDay: event.allDay ?? false,
     location: event.location ? { displayName: event.location } : undefined,
   };
+
+  // If a conference payload is provided, instruct Graph to create an online meeting.
+  if (event.conferenceData) {
+    payload["isOnlineMeeting"] = true;
+    payload["onlineMeetingProvider"] = "teamsForBusiness";
+  }
+
+  return payload;
 }
 
 interface ParseMicrosoftCalendarOptions {
@@ -198,6 +207,33 @@ export function calendarPath(calendarId: string) {
   return calendarId === "primary"
     ? "/me/calendar"
     : `/me/calendars/${calendarId}`;
+}
+
+function parseMicrosoftConferenceData(
+  event: MicrosoftEvent,
+): CalendarEvent["conferenceData"] {
+  const info = event.onlineMeeting;
+  const joinUrl = info?.joinUrl ?? event.onlineMeetingUrl;
+
+  if (!joinUrl) {
+    return undefined;
+  }
+
+  const phoneNumbers = info?.phones
+    ?.map((p) => p.number)
+    .filter((n): n is string => Boolean(n));
+
+  return {
+    id: info?.conferenceId ?? undefined,
+    name:
+      event.onlineMeetingProvider === "teamsForBusiness"
+        ? "Microsoft Teams"
+        : "Online Meeting",
+    joinUrl,
+    meetingCode: info?.conferenceId ?? undefined,
+    phoneNumbers:
+      phoneNumbers && phoneNumbers.length ? phoneNumbers : undefined,
+  };
 }
 
 export function eventResponseStatusPath(

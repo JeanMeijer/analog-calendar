@@ -29,7 +29,7 @@ export function AddAccountDialog({ children }: AddAccountDialogProps) {
     try {
       setIsLoading(provider);
       await authClient.linkSocial({
-        provider: provider as "google" | "microsoft",
+        provider: provider as "google" | "microsoft" | "zoom",
         callbackURL: "/calendar",
       });
       setOpen(false);
