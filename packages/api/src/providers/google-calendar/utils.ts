@@ -7,8 +7,8 @@ import {
   AttendeeStatus,
   Calendar,
   CalendarEvent,
-  Conference,
   CalendarFreeBusy,
+  Conference,
 } from "../interfaces";
 import {
   GoogleCalendarCalendarListEntry,
