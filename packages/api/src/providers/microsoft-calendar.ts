@@ -144,9 +144,17 @@ export class MicrosoftCalendarProvider implements CalendarProvider {
     event: UpdateEventInput,
   ): Promise<CalendarEvent> {
     return this.withErrorHandler("updateEvent", async () => {
-      const updatedEvent: MicrosoftEvent = await this.graphClient
-        .api(`${calendarPath(calendar.id)}/events/${eventId}`)
-        .patch(toMicrosoftEvent(event));
+      let request = this.graphClient.api(
+        `${calendarPath(calendar.id)}/events/${eventId}`,
+      );
+
+      if (event.etag) {
+        request = request.header("If-Match", event.etag);
+      }
+
+      const updatedEvent: MicrosoftEvent = await request.patch(
+        toMicrosoftEvent(event),
+      );
 
       return parseMicrosoftEvent({
         event: updatedEvent,

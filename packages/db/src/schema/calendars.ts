@@ -66,6 +66,7 @@ export const events = pgTable(
     url: text("url"),
 
     syncToken: text("sync_token"),
+    etag: text("etag"),
 
     calendarId: text("calendar_id")
       .notNull()

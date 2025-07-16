@@ -112,6 +112,7 @@ export function parseMicrosoftEvent({
 
   return {
     id: event.id!,
+    etag: event.changeKey ?? undefined,
     title: event.subject!,
     description: event.bodyPreview ?? undefined,
     start: isAllDay

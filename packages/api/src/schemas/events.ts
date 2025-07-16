@@ -60,6 +60,7 @@ export const createEventInputSchema = z.object({
 
 export const updateEventInputSchema = createEventInputSchema.extend({
   id: z.string(),
+  etag: z.string().optional(),
   conference: conferenceSchema.optional(),
   metadata: z.union([microsoftMetadataSchema, googleMetadataSchema]).optional(),
 });

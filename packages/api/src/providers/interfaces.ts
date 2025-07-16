@@ -21,6 +21,7 @@ export interface Calendar {
 
 export interface CalendarEvent {
   id: string;
+  etag?: string;
   title?: string;
   description?: string;
   start: Temporal.PlainDate | Temporal.Instant | Temporal.ZonedDateTime;

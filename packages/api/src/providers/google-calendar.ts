@@ -139,11 +139,15 @@ export class GoogleCalendarProvider implements CalendarProvider {
         },
       );
 
-      const updatedEvent = await this.client.calendars.events.update(eventId, {
-        ...existingEvent,
-        calendarId: calendar.id,
-        ...toGoogleCalendarEvent(event),
-      });
+      const updatedEvent = await this.client.calendars.events.update(
+        eventId,
+        {
+          ...existingEvent,
+          calendarId: calendar.id,
+          ...toGoogleCalendarEvent(event),
+        },
+        event.etag ? { headers: { "If-Match": event.etag } } : undefined,
+      );
 
       return parseGoogleCalendarEvent({
         calendar,

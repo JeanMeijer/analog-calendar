@@ -71,6 +71,7 @@ export function parseGoogleCalendarEvent({
   return {
     // ID should always be present if not defined Google Calendar will generate one
     id: event.id!,
+    etag: event.etag,
     title: event.summary!,
     description: event.description,
     start: isAllDay
@@ -102,6 +103,7 @@ export function toGoogleCalendarEvent(
     location: event.location,
     start: toGoogleCalendarDate(event.start),
     end: toGoogleCalendarDate(event.end),
+    ...("etag" in event && event.etag ? { etag: event.etag } : {}),
     // conferenceData: event.conference
     //   ? toGoogleCalendarConferenceData(event.conference)
     //   : undefined,
