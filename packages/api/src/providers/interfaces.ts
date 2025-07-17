@@ -32,7 +32,7 @@ export interface CalendarEvent {
   url?: string;
   color?: string;
   readOnly: boolean;
-  providerId: "google" | "microsoft" | "zoom";
+  providerId: "google" | "microsoft" | "zoom" | "ics";
   accountId: string;
   calendarId: string;
   metadata?: Record<string, unknown>;

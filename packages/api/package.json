@@ -26,6 +26,7 @@
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/env": "workspace:*",
+    "@analog/ical": "workspace:*",
     "@analog/meeting-links": "workspace:*",
     "@repo/temporal": "workspace:*",
     "@repo/google-calendar": "workspace:*",
