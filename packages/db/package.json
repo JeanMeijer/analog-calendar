@@ -8,14 +8,14 @@
   },
   "scripts": {
     "lint": "eslint .",
+    "type-check": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "format": "prettier --write \"**/*.{ts,tsx,css,,md}\""
+    "db:studio": "drizzle-kit studio"
   },
   "peerDependencies": {
-    "drizzle-orm": "^0.43.1"
+    "drizzle-orm": "^0.44.2"
   },
   "dependencies": {
     "@repo/env": "workspace:*",
@@ -25,9 +25,9 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20.19.1",
-    "drizzle-kit": "^0.31.2",
-    "eslint": "^9.29.0",
+    "@types/node": "^22.9.0",
+    "drizzle-kit": "^0.31.4",
+    "eslint": "^9.30.1",
     "typescript": "^5.8.3"
   }
 }

@@ -5,6 +5,18 @@ import {
 } from "temporal-zod";
 import { z } from "zod";
 
+const conferenceSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().optional(),
+  joinUrl: z.string().url().optional(),
+  hostUrl: z.string().url().optional(),
+  meetingCode: z.string().optional(),
+  password: z.string().optional(),
+  phoneNumbers: z.array(z.string()).optional(),
+  notes: z.string().optional(),
+  extra: z.record(z.unknown()).optional(),
+});
+
 const microsoftMetadataSchema = z.object({
   originalStartTimeZone: z
     .object({
@@ -29,6 +41,7 @@ export const dateInputSchema = z.union([
 ]);
 
 export const createEventInputSchema = z.object({
+  id: z.string(),
   title: z.string().optional(),
   start: dateInputSchema,
   end: dateInputSchema,
@@ -38,11 +51,15 @@ export const createEventInputSchema = z.object({
   color: z.string().optional(),
   accountId: z.string(),
   calendarId: z.string(),
+  providerId: z.enum(["google", "microsoft"]),
+  readOnly: z.boolean(),
   metadata: z.union([microsoftMetadataSchema, googleMetadataSchema]).optional(),
+  conference: conferenceSchema.optional(),
 });
 
 export const updateEventInputSchema = createEventInputSchema.extend({
   id: z.string(),
+  conference: conferenceSchema.optional(),
   metadata: z.union([microsoftMetadataSchema, googleMetadataSchema]).optional(),
 });
 

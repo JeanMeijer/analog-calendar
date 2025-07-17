@@ -16,6 +16,7 @@ export const KEYBOARD_SHORTCUTS = {
   NEXT_PERIOD: "n",
   PREVIOUS_PERIOD: "p",
   TODAY: "t",
+  CREATE_EVENT: "c",
 } as const;
 
 export function CalendarHotkeys() {

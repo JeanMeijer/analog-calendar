@@ -1,28 +1,35 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
+import * as React from "react";
+import {
+  PanInfo,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+} from "motion/react";
 import { Temporal } from "temporal-polyfill";
 
-import { useCalendarSettings } from "@/atoms";
-import {
-  CalendarEvent,
-  EventItem,
-  useCalendarDnd,
-} from "@/components/event-calendar";
+import { CalendarEvent, EventItem } from "@/components/event-calendar";
+import { EventContextMenu } from "@/components/event-calendar/event-context-menu";
+import { ContextMenuTrigger } from "@/components/ui/context-menu";
+import type { Action } from "./hooks/use-optimistic-events";
 
 interface DraggableEventProps {
   event: CalendarEvent;
   view: "month" | "week" | "day";
   showTime?: boolean;
   onClick?: (e: React.MouseEvent) => void;
+  dispatchAction: (action: Action) => void;
+  setIsDragging?: (isDragging: boolean) => void;
   height?: number;
   isMultiDay?: boolean;
   multiDayWidth?: number;
   isFirstDay?: boolean;
   isLastDay?: boolean;
   "aria-hidden"?: boolean | "true" | "false";
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  rows?: number;
+  zIndex?: number;
 }
 
 interface IsMultiDayEventOptions {
@@ -51,111 +58,272 @@ export function DraggableEvent({
   view,
   showTime,
   onClick,
-  height,
-  multiDayWidth,
+  height: initialHeight,
+  dispatchAction,
   isFirstDay = true,
   isLastDay = true,
   "aria-hidden": ariaHidden,
+  containerRef,
+  rows,
+  setIsDragging,
+  zIndex,
 }: DraggableEventProps) {
-  const { activeId } = useCalendarDnd();
-  const elementRef = useRef<HTMLDivElement>(null);
-  const [dragHandlePosition, setDragHandlePosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+  const dragRef = React.useRef<HTMLDivElement>(null);
 
-  const { defaultTimeZone } = useCalendarSettings();
+  const eventRef = React.useRef(event);
+  const heightRef = React.useRef(initialHeight);
 
-  const isMultiDay = isMultiDayEvent({
-    event,
-    defaultTimeZone,
-  });
+  React.useEffect(() => {
+    eventRef.current = event;
+    heightRef.current = initialHeight;
+  }, [event, initialHeight]);
 
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: `${event.id}-${view}`,
-      data: {
-        event,
-        view,
-        height: height || elementRef.current?.offsetHeight || null,
-        isMultiDay,
-        multiDayWidth: multiDayWidth,
-        dragHandlePosition,
-        isFirstDay,
-        isLastDay,
-      },
-    });
+  const top = useMotionValue(0);
+  const left = useMotionValue(0);
+  const height = useMotionValue(initialHeight ?? "100%");
+  const transform = useMotionTemplate`translate(${left}px,${top}px)`;
 
-  // Handle mouse down to track where on the event the user clicked
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (elementRef.current) {
-      const rect = elementRef.current.getBoundingClientRect();
-      setDragHandlePosition({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      });
-    }
+  React.useEffect(() => {
+    height.set(initialHeight ?? "100%");
+  }, [initialHeight, height]);
+
+  const onDragStart = () => {
+    setIsDragging?.(true);
   };
 
-  // Don't render if this event is being dragged
-  if (isDragging || activeId === `${event.id}-${view}`) {
+  const onDrag = (event: PointerEvent, info: PanInfo) => {
+    top.set(info.offset.y);
+    left.set(info.offset.x);
+  };
+
+  const onDragEnd = (_e: PointerEvent, info: PanInfo) => {
+    setIsDragging?.(false);
+    top.set(0);
+    left.set(0);
+
+    const current = eventRef.current;
+    // @ts-expect-error -- should both be of the same type
+    const duration = current.start.until(current.end);
+
+    const columnDelta = Math.round(
+      (info.offset.x /
+        (containerRef.current?.getBoundingClientRect().width || 0)) *
+        7,
+    );
+
+    if (view === "month") {
+      if (!rows) {
+        return;
+      }
+
+      const rowDelta = Math.round(
+        (info.offset.y /
+          (containerRef.current?.getBoundingClientRect().height || 0)) *
+          rows,
+      );
+
+      const start = current.start.add({ days: columnDelta + rowDelta * 7 });
+      const end = start.add(duration);
+
+      dispatchAction({ type: "update", event: { ...current, start, end } });
+
+      return;
+    }
+
+    if (view === "day") {
+      if (current.start instanceof Temporal.PlainDate) {
+        return;
+      }
+
+      const minutes = Math.round((info.offset.y / 64) * 60);
+      const start = current.start.add({ minutes }).round({
+        smallestUnit: "minute",
+        roundingIncrement: 15,
+        roundingMode: "halfExpand",
+      });
+
+      const end = start.add(duration);
+
+      dispatchAction({ type: "update", event: { ...current, start, end } });
+
+      return;
+    }
+
+    if (current.start instanceof Temporal.PlainDate) {
+      const start = current.start.add({ days: columnDelta });
+      const end = start.add(duration);
+
+      dispatchAction({ type: "update", event: { ...current, start, end } });
+
+      return;
+    }
+
+    const minutes = Math.round((info.offset.y / 64) * 60);
+    const start = current.start
+      .add({ days: columnDelta })
+      .add({ minutes })
+      .round({
+        smallestUnit: "minute",
+        roundingIncrement: 15,
+        roundingMode: "halfExpand",
+      });
+
+    const end = start.add(duration);
+
+    dispatchAction({ type: "update", event: { ...current, start, end } });
+  };
+
+  const startHeight = React.useRef(0);
+
+  const onResizeTopStart = (_e: PointerEvent, info: PanInfo) => {
+    startHeight.current = heightRef.current ?? 0;
+    height.set(startHeight.current - info.offset.y);
+    top.set(info.offset.y);
+  };
+  const onResizeBottomStart = (_e: PointerEvent, info: PanInfo) => {
+    startHeight.current = heightRef.current ?? 0;
+    height.set(startHeight.current + info.offset.y);
+  };
+
+  const onResizeTop = (_e: PointerEvent, info: PanInfo) => {
+    height.set(startHeight.current - info.offset.y);
+    top.set(info.offset.y);
+  };
+
+  const onResizeBottom = (_e: PointerEvent, info: PanInfo) => {
+    height.set(startHeight.current + info.offset.y);
+  };
+
+  const updateStartTime = React.useCallback(
+    (offsetY: number) => {
+      const start = eventRef.current.start as
+        | Temporal.ZonedDateTime
+        | Temporal.Instant;
+      const minutes = Math.round((offsetY / 64) * 60);
+      const rounded = start.add({ minutes }).round({
+        smallestUnit: "minute",
+        roundingIncrement: 15,
+        roundingMode: "halfExpand",
+      });
+
+      dispatchAction({
+        type: "update",
+        event: { ...eventRef.current, start: rounded },
+      });
+    },
+    [dispatchAction],
+  );
+
+  const updateEndTime = React.useCallback(
+    (offsetY: number) => {
+      const end = eventRef.current.end as
+        | Temporal.ZonedDateTime
+        | Temporal.Instant;
+      const minutes = Math.round((offsetY / 64) * 60);
+      const rounded = end.add({ minutes }).round({
+        smallestUnit: "minute",
+        roundingIncrement: 15,
+        roundingMode: "halfExpand",
+      });
+
+      dispatchAction({
+        type: "update",
+        event: { ...eventRef.current, end: rounded },
+      });
+    },
+    [dispatchAction],
+  );
+
+  const onResizeTopEnd = (_: PointerEvent, info: PanInfo) => {
+    top.set(0);
+    updateStartTime(info.offset.y);
+  };
+  const onResizeBottomEnd = (_: PointerEvent, info: PanInfo) => {
+    top.set(0);
+    updateEndTime(info.offset.y);
+  };
+
+  if (event.allDay || view === "month") {
     return (
-      <div
-        ref={setNodeRef}
-        className="opacity-0"
-        style={{ height: height || "auto" }}
-      />
+      <motion.div
+        ref={dragRef}
+        className="@container/event size-full touch-none"
+        style={{ transform, height, top, zIndex }}
+      >
+        <EventContextMenu event={event} dispatchAction={dispatchAction}>
+          <ContextMenuTrigger>
+            <EventItem
+              event={event}
+              view={view}
+              showTime={showTime}
+              isFirstDay={isFirstDay}
+              isLastDay={isLastDay}
+              onClick={onClick}
+              onMouseDown={onClick}
+              // onTouchStart={handleTouchStart}
+              aria-hidden={ariaHidden}
+            >
+              {!event.readOnly ? (
+                <>
+                  <motion.div
+                    className="absolute inset-x-0 inset-y-2 touch-pan-x touch-pan-y"
+                    onPanStart={onDragStart}
+                    onPan={onDrag}
+                    onPanEnd={onDragEnd}
+                  />
+                </>
+              ) : null}
+            </EventItem>
+          </ContextMenuTrigger>
+        </EventContextMenu>
+      </motion.div>
     );
   }
 
-  const style = transform
-    ? {
-        transform: CSS.Translate.toString(transform),
-        height: height || "auto",
-        width: isMultiDay && multiDayWidth ? `${multiDayWidth}%` : undefined,
-      }
-    : {
-        height: height || "auto",
-        width: isMultiDay && multiDayWidth ? `${multiDayWidth}%` : undefined,
-      };
-
-  // Handle touch start to track where on the event the user touched
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (elementRef.current) {
-      const rect = elementRef.current.getBoundingClientRect();
-      const touch = e.touches[0];
-      if (touch) {
-        setDragHandlePosition({
-          x: touch.clientX - rect.left,
-          y: touch.clientY - rect.top,
-        });
-      }
-    }
-  };
-
   return (
-    <div
-      ref={(node) => {
-        setNodeRef(node);
-        if (elementRef) elementRef.current = node;
-      }}
-      style={style}
-      className="touch-none"
+    <motion.div
+      ref={dragRef}
+      className="@container/event size-full touch-none"
+      style={{ transform, height: height, zIndex }}
     >
-      <EventItem
-        event={event}
-        view={view}
-        showTime={showTime}
-        isFirstDay={isFirstDay}
-        isLastDay={isLastDay}
-        isDragging={isDragging}
-        onClick={onClick}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-        dndListeners={listeners}
-        dndAttributes={attributes}
-        aria-hidden={ariaHidden}
-      />
-    </div>
+      <EventContextMenu event={event} dispatchAction={dispatchAction}>
+        <ContextMenuTrigger>
+          <EventItem
+            event={event}
+            view={view}
+            showTime={showTime}
+            isFirstDay={isFirstDay}
+            isLastDay={isLastDay}
+            onClick={onClick}
+            onMouseDown={onClick}
+            // onTouchStart={handleTouchStart}
+            aria-hidden={ariaHidden}
+          >
+            {!event.readOnly ? (
+              <>
+                <motion.div
+                  className="absolute inset-0 touch-pan-x touch-pan-y"
+                  onPanStart={onDragStart}
+                  onPan={onDrag}
+                  onPanEnd={onDragEnd}
+                />
+                <motion.div
+                  className="absolute inset-x-0 top-0 h-[min(15%,_0.25rem)] cursor-row-resize touch-pan-y"
+                  onPanStart={onResizeTopStart}
+                  onPan={onResizeTop}
+                  onPanEnd={onResizeTopEnd}
+                />
+                <motion.div
+                  className="absolute inset-x-0 bottom-0 h-[min(15%,_0.25rem)] cursor-row-resize touch-pan-y"
+                  onPanStart={onResizeBottomStart}
+                  onPan={onResizeBottom}
+                  onPanEnd={onResizeBottomEnd}
+                />
+              </>
+            ) : null}
+          </EventItem>
+        </ContextMenuTrigger>
+      </EventContextMenu>
+    </motion.div>
   );
 }

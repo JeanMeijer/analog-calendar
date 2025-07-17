@@ -4,6 +4,8 @@ export type GoogleCalendarCalendar = GoogleCalendar.Calendars.Calendar;
 export type GoogleCalendarCalendarListEntry =
   GoogleCalendar.Users.Me.CalendarListEntry;
 export type GoogleCalendarEvent = GoogleCalendar.Calendars.Events.Event;
+export type GoogleCalendarEventConferenceData =
+  GoogleCalendar.Calendars.Events.Event.ConferenceData;
 
 export type GoogleCalendarEventCreateParams =
   GoogleCalendar.Calendars.Events.EventCreateParams;

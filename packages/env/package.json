@@ -7,10 +7,11 @@
     "./server": "./src/server.ts"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "zod": "^3.25.67"
+    "zod": "^3.25.76"
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.13.8"
@@ -18,8 +19,8 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20.19.1",
-    "eslint": "^9.29.0",
+    "@types/node": "^22.9.0",
+    "eslint": "^9.30.1",
     "typescript": "^5.8.3"
   }
 }

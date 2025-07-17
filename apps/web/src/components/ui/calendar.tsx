@@ -89,7 +89,7 @@ function Calendar({
 
   const _monthsClassName = cn("relative flex", props.monthsClassName);
   const _monthCaptionClassName = cn(
-    "relative mx-3 flex h-7 items-center justify-start",
+    "relative mx-3 flex h-7 items-center justify-start pointer-events-none",
     props.monthCaptionClassName,
   );
   const _weekdaysClassName = cn("flex flex-row", props.weekdaysClassName);

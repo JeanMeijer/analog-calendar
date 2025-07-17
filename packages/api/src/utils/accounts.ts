@@ -1,88 +1,66 @@
 import "server-only";
-import { auth, type Session } from "@repo/auth/server";
+
+import { eq } from "drizzle-orm";
+
+import { auth, type Account, type User } from "@repo/auth/server";
 import { db } from "@repo/db";
+import { user as userTable } from "@repo/db/schema";
 
-export const getActiveAccount = async (
-  user: Session["user"],
-  headers: Headers,
-) => {
-  if (user?.defaultAccountId) {
-    const activeAccount = await db.query.account.findFirst({
-      where: (table, { eq, and }) =>
-        and(
-          eq(table.userId, user.id),
-          eq(table.id, user.defaultAccountId as string),
-        ),
-    });
-
-    if (activeAccount) {
-      const { accessToken } = await auth.api.getAccessToken({
-        body: {
-          providerId: activeAccount?.providerId,
-          accountId: activeAccount?.id,
-          userId: activeAccount?.userId,
-        },
-        headers,
-      });
-
-      return {
-        ...activeAccount,
-        accessToken: accessToken ?? activeAccount.accessToken,
-      };
-    }
-  }
-
-  const firstAccount = await db.query.account.findFirst({
-    where: (table, { eq }) => eq(table.userId, user.id),
-  });
-
-  if (!firstAccount) {
-    throw new Error("No account found");
-  }
-
+async function withAccessToken(account: Account, headers: Headers) {
   const { accessToken } = await auth.api.getAccessToken({
     body: {
-      providerId: firstAccount.providerId,
-      accountId: firstAccount.id,
-      userId: firstAccount.userId,
+      providerId: account.providerId,
+      accountId: account.id,
+      userId: account.userId,
     },
     headers,
   });
 
   return {
-    ...firstAccount,
-    accessToken: accessToken ?? firstAccount.accessToken,
+    ...account,
+    accessToken: accessToken ?? account.accessToken,
   };
-};
+}
 
-export const getAccounts = async (user: Session["user"], headers: Headers) => {
-  const _accounts = await db.query.account.findMany({
+export async function getDefaultAccount(user: User, headers: Headers) {
+  const defaultAccountId = user.defaultAccountId;
+
+  if (defaultAccountId) {
+    const defaultAccount = await db.query.account.findFirst({
+      where: (table, { eq, and }) =>
+        and(eq(table.userId, user.id), eq(table.id, defaultAccountId)),
+    });
+
+    return await withAccessToken(defaultAccount!, headers);
+  }
+
+  const account = await db.transaction(async (tx) => {
+    const account = await tx.query.account.findFirst({
+      where: (table, { eq }) => eq(table.userId, user.id),
+      orderBy: (table, { desc }) => desc(table.createdAt),
+    });
+
+    await tx
+      .update(userTable)
+      .set({
+        defaultAccountId: account!.id,
+      })
+      .where(eq(userTable.id, user.id));
+
+    return account!;
+  });
+
+  return await withAccessToken(account, headers);
+}
+
+export async function getAccounts(user: User, headers: Headers) {
+  const accounts = await db.query.account.findMany({
     where: (table, { eq }) => eq(table.userId, user.id),
   });
 
-  const accounts = await Promise.all(
-    _accounts.map(async (account) => {
-      try {
-        const { accessToken } = await auth.api.getAccessToken({
-          body: {
-            providerId: account.providerId,
-            accountId: account.id,
-            userId: account.userId,
-          },
-          headers,
-        });
+  const promises = accounts.map(async (account) => {
+    return withAccessToken(account, headers);
+  });
 
-        return {
-          ...account,
-          accessToken: accessToken ?? account.accessToken,
-        };
-      } catch {
-        throw new Error(`Failed to get access token for account ${account.id}`);
-      }
-    }),
-  );
-
-  return accounts.filter(
-    (account) => account.accessToken && account.refreshToken,
-  );
-};
+  return Promise.all(promises);
+}

@@ -7,13 +7,14 @@ import { XIcon } from "lucide-react";
 import { toDate } from "@repo/temporal";
 
 import { EventItem, type CalendarEvent } from "@/components/event-calendar";
+import type { Action } from "@/components/event-calendar/hooks/use-optimistic-events";
 
 interface EventsPopupProps {
   date: Date;
   events: CalendarEvent[];
   position: { top: number; left: number };
   onClose: () => void;
-  onEventSelect: (event: CalendarEvent) => void;
+  dispatchAction: (action: Action) => void;
 }
 
 export function EventsPopup({
@@ -21,7 +22,7 @@ export function EventsPopup({
   events,
   position,
   onClose,
-  onEventSelect,
+  dispatchAction,
 }: EventsPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +58,7 @@ export function EventsPopup({
   }, [onClose]);
 
   const handleEventClick = (event: CalendarEvent) => {
-    onEventSelect(event);
+    dispatchAction({ type: "select", event });
     onClose();
   };
 

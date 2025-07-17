@@ -195,6 +195,12 @@
     var(--foreground),
     var(--calendar-tint) 80%
   );
+
+  --grid-event-form: 1em minmax(0, 1fr) 1em minmax(0, 1fr);
+
+  --font-weight-normal: 350;
+  --font-weight-medium: 400;
+  --font-weight-semibold: 500;
 }
 
 @layer base {

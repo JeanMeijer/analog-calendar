@@ -4,6 +4,7 @@ import { GoogleCalendar } from "@repo/google-calendar";
 
 import { CALENDAR_DEFAULTS } from "../constants/calendar";
 import { CreateEventInput, UpdateEventInput } from "../schemas/events";
+import { assignColor } from "./colors";
 import {
   parseGoogleCalendarCalendarListEntry,
   parseGoogleCalendarEvent,
@@ -36,12 +37,17 @@ export class GoogleCalendarProvider implements CalendarProvider {
 
       if (!items) return [];
 
-      return items.map((calendar) =>
-        parseGoogleCalendarCalendarListEntry({
+      return items.map((calendar, index) => {
+        const parsedCalendar = parseGoogleCalendarCalendarListEntry({
           accountId: this.accountId,
           entry: calendar,
-        }),
-      );
+        });
+
+        return {
+          ...parsedCalendar,
+          color: assignColor(index),
+        };
+      });
     });
   }
 
@@ -83,12 +89,12 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async events(
-    calendarId: string,
+    calendar: Calendar,
     timeMin: Temporal.ZonedDateTime,
     timeMax: Temporal.ZonedDateTime,
   ): Promise<CalendarEvent[]> {
     return this.withErrorHandler("events", async () => {
-      const { items } = await this.client.calendars.events.list(calendarId, {
+      const { items } = await this.client.calendars.events.list(calendar.id, {
         timeMin: timeMin.withTimeZone("UTC").toInstant().toString(),
         timeMax: timeMax.withTimeZone("UTC").toInstant().toString(),
         singleEvents: CALENDAR_DEFAULTS.SINGLE_EVENTS,
@@ -99,7 +105,7 @@ export class GoogleCalendarProvider implements CalendarProvider {
       return (
         items?.map((event) =>
           parseGoogleCalendarEvent({
-            calendarId,
+            calendar,
             accountId: this.accountId,
             event,
           }),
@@ -109,17 +115,17 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async createEvent(
-    calendarId: string,
+    calendar: Calendar,
     event: CreateEventInput,
   ): Promise<CalendarEvent> {
     return this.withErrorHandler("createEvent", async () => {
       const createdEvent = await this.client.calendars.events.create(
-        calendarId,
+        calendar.id,
         toGoogleCalendarEvent(event),
       );
 
       return parseGoogleCalendarEvent({
-        calendarId,
+        calendar,
         accountId: this.accountId,
         event: createdEvent,
       });
@@ -127,7 +133,7 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async updateEvent(
-    calendarId: string,
+    calendar: Calendar,
     eventId: string,
     event: UpdateEventInput,
   ): Promise<CalendarEvent> {
@@ -135,18 +141,18 @@ export class GoogleCalendarProvider implements CalendarProvider {
       const existingEvent = await this.client.calendars.events.retrieve(
         eventId,
         {
-          calendarId,
+          calendarId: calendar.id,
         },
       );
 
       const updatedEvent = await this.client.calendars.events.update(eventId, {
         ...existingEvent,
-        calendarId,
+        calendarId: calendar.id,
         ...toGoogleCalendarEvent(event),
       });
 
       return parseGoogleCalendarEvent({
-        calendarId,
+        calendar,
         accountId: this.accountId,
         event: updatedEvent,
       });

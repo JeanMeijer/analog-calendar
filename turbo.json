@@ -12,12 +12,15 @@
         "GOOGLE_CLIENT_SECRET",
         "VERCEL_URL",
         "NEXT_PUBLIC_VERCEL_URL",
+        "NEXT_PUBLIC_VERCEL_ENV",
         "UPSTASH_REDIS_REST_URL",
         "UPSTASH_REDIS_REST_TOKEN",
         "SIMPLE_ANALYTICS_HOSTNAME",
         "NEXT_PUBLIC_SIMPLE_ANALYTICS_HOSTNAME",
         "MICROSOFT_CLIENT_ID",
-        "MICROSOFT_CLIENT_SECRET"
+        "MICROSOFT_CLIENT_SECRET",
+        "ZOOM_CLIENT_ID",
+        "ZOOM_CLIENT_SECRET"
       ],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
@@ -32,16 +35,24 @@
         "BETTER_AUTH_URL",
         "GOOGLE_CLIENT_ID",
         "GOOGLE_CLIENT_SECRET",
+        "VERCEL_URL",
+        "NEXT_PUBLIC_VERCEL_URL",
+        "NEXT_PUBLIC_VERCEL_ENV",
         "UPSTASH_REDIS_REST_URL",
         "UPSTASH_REDIS_REST_TOKEN",
         "SIMPLE_ANALYTICS_HOSTNAME",
         "NEXT_PUBLIC_SIMPLE_ANALYTICS_HOSTNAME",
         "MICROSOFT_CLIENT_ID",
-        "MICROSOFT_CLIENT_SECRET"
+        "MICROSOFT_CLIENT_SECRET",
+        "ZOOM_CLIENT_ID",
+        "ZOOM_CLIENT_SECRET"
       ]
     },
     "lint": {
       "dependsOn": ["^lint"]
+    },
+    "type-check": {
+      "cache": false
     },
     "db:generate": {
       "cache": false

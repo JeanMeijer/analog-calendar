@@ -274,11 +274,44 @@ function findEventColumn(
   }
 }
 
-function calculateEventLayout(columnIndex: number) {
+function calculateEventLayout(
+  columnIndex: number,
+  totalColumns: number,
+  eventsInGroup: number,
+  groupIndex: number,
+  overlapDepth: number,
+  baseZIndex: number,
+): { width: number; left: number; zIndex: number } {
+  // Calculate width and offset based on overlap depth (each level reduces width by 10%)
+  const offsetPercentage = overlapDepth * 0.1; // 10% offset per overlap level
+  const availableWidth = 1 - offsetPercentage; // Reduce width by 10% per overlap level
+  const leftOffset = offsetPercentage; // Start offset increases with depth
+
+  // If events start within close proximity (handled by grouping), split available space equally
+  if (eventsInGroup > 1) {
+    const equalWidth = availableWidth / eventsInGroup;
+
+    return {
+      width: equalWidth,
+      left: leftOffset + groupIndex * equalWidth,
+      zIndex: baseZIndex + groupIndex, // Use chronological z-index + group position
+    };
+  }
+
+  // For events that overlap with groups but aren't in a group
+  if (overlapDepth > 0 && totalColumns >= 1) {
+    return {
+      width: availableWidth,
+      left: leftOffset,
+      zIndex: baseZIndex + 5 + columnIndex, // Slightly higher than group events
+    };
+  }
+
+  // Single event with no overlaps
   return {
-    width: columnIndex === 0 ? 1 : 0.9,
-    left: columnIndex === 0 ? 0 : columnIndex * 0.1,
-    zIndex: 10 + columnIndex,
+    width: 1,
+    left: 0,
+    zIndex: baseZIndex, // Use chronological z-index
   };
 }
 
@@ -290,42 +323,150 @@ function positionEventsForDay(
 ): PositionedEvent[] {
   const timedEvents = getTimedEventsForDay(events, day);
   const sortedEvents = sortEventsForCollisionDetection(timedEvents);
-  const columns: EventColumn[][] = [];
   const positioned: PositionedEvent[] = [];
 
-  sortedEvents.forEach((event) => {
-    const { start: adjustedStart, end: adjustedEnd } = getAdjustedEventTimes(
-      event,
-      day,
-    );
-    const { top, height } = calculateEventDimensions(
-      adjustedStart,
-      adjustedEnd,
-      startHour,
-      cellHeight,
-    );
+  // Group events that start within 24px of each other
+  const proximityThresholdHours = 40 / cellHeight;
+  const eventGroups: CalendarEvent[][] = [];
 
-    const columnIndex = findEventColumn(
-      event,
-      adjustedStart,
-      adjustedEnd,
-      columns,
-    );
-    const { width, left, zIndex } = calculateEventLayout(columnIndex);
+  for (const event of sortedEvents) {
+    const { start } = getAdjustedEventTimes(event, day);
+    const startHourValue = getHours(start) + getMinutes(start) / 60;
 
-    const column = columns[columnIndex] || [];
-    columns[columnIndex] = column;
-    column.push({ event, end: adjustedEnd });
+    // Find existing group within proximity threshold
+    let assignedGroup = false;
+    for (const group of eventGroups) {
+      if (group.length > 0) {
+        const { start: groupStart, end: groupEnd } = getAdjustedEventTimes(
+          group[0]!,
+          day,
+        );
+        const groupStartHourValue =
+          getHours(groupStart) + getMinutes(groupStart) / 60;
 
-    positioned.push({
-      event,
-      top,
-      height,
-      left,
-      width,
-      zIndex,
-    });
-  });
+        const groupEndTime = getHours(groupEnd) + getMinutes(groupEnd) / 60;
+
+        if (
+          Math.abs(startHourValue - groupStartHourValue) <=
+            proximityThresholdHours &&
+          startHourValue < groupEndTime // Only add if event starts before group ends
+        ) {
+          group.push(event);
+          assignedGroup = true;
+          break;
+        }
+      }
+    }
+
+    if (!assignedGroup) {
+      eventGroups.push([event]);
+    }
+  }
+
+  // Calculate cumulative overlap layers for chronological z-index
+  let currentZLayer = 10;
+  const groupZLayers: number[] = [];
+
+  for (const [groupIdx, group] of eventGroups.entries()) {
+    // Check if this group overlaps with any previous groups
+    const hasOverlapWithPrevious = eventGroups
+      .slice(0, groupIdx)
+      .some((previousGroup) => {
+        return group.some((groupEvent) => {
+          const { start: groupStart, end: groupEnd } =
+            getEventDates(groupEvent);
+          return previousGroup.some((previousEvent) => {
+            const { start: previousStart, end: previousEnd } =
+              getEventDates(previousEvent);
+            return areIntervalsOverlapping(
+              { start: groupStart, end: groupEnd },
+              { start: previousStart, end: previousEnd },
+            );
+          });
+        });
+      });
+
+    if (hasOverlapWithPrevious) {
+      currentZLayer += 10; // Increase layer for overlapping groups
+    } else {
+      currentZLayer = 10; // Reset when no overlap
+    }
+
+    groupZLayers[groupIdx] = currentZLayer;
+  }
+
+  // Process each group separately
+  for (const [groupIdx, group] of eventGroups.entries()) {
+    const columns: EventColumn[][] = [];
+
+    // Calculate overlap depth - how many previous groups this group overlaps with
+    const overlapDepth = eventGroups
+      .slice(0, groupIdx)
+      .filter((previousGroup) => {
+        return group.some((groupEvent) => {
+          const { start: groupStart, end: groupEnd } =
+            getEventDates(groupEvent);
+          return previousGroup.some((previousEvent) => {
+            const { start: previousStart, end: previousEnd } =
+              getEventDates(previousEvent);
+            return areIntervalsOverlapping(
+              { start: groupStart, end: groupEnd },
+              { start: previousStart, end: previousEnd },
+            );
+          });
+        });
+      }).length;
+
+    const baseZIndex = groupZLayers[groupIdx]!;
+
+    for (const [groupIndex, event] of group.entries()) {
+      const { start: adjustedStart, end: adjustedEnd } = getAdjustedEventTimes(
+        event,
+        day,
+      );
+      const { top, height } = calculateEventDimensions(
+        adjustedStart,
+        adjustedEnd,
+        startHour,
+        cellHeight,
+      );
+
+      const columnIndex = findEventColumn(
+        event,
+        adjustedStart,
+        adjustedEnd,
+        columns,
+      );
+
+      // Calculate total columns needed for this group
+      const totalColumns = Math.max(
+        columnIndex + 1,
+        columns.filter((col) => col.length > 0).length,
+      );
+
+      const { width, left, zIndex } = calculateEventLayout(
+        columnIndex,
+        totalColumns,
+        group.length,
+        groupIndex,
+        overlapDepth,
+        baseZIndex,
+      );
+
+      const column = columns[columnIndex] || [];
+      columns[columnIndex] = column;
+      column.push({ event, end: adjustedEnd });
+
+      positioned.push({
+        event,
+        top,
+        height,
+        left,
+        width,
+        zIndex,
+      });
+    }
+  }
 
   return positioned;
 }

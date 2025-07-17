@@ -9,18 +9,19 @@ export type TemporalDate =
 
 export interface Calendar {
   id: string;
-  providerId: string;
+  providerId: "google" | "microsoft";
   name: string;
   description?: string;
   timeZone?: string;
   primary: boolean;
   accountId: string;
   color?: string;
+  readOnly: boolean;
 }
 
 export interface CalendarEvent {
   id: string;
-  title: string;
+  title?: string;
   description?: string;
   start: Temporal.PlainDate | Temporal.Instant | Temporal.ZonedDateTime;
   end: Temporal.PlainDate | Temporal.Instant | Temporal.ZonedDateTime;
@@ -30,10 +31,12 @@ export interface CalendarEvent {
   attendees?: Attendee[];
   url?: string;
   color?: string;
-  providerId: string;
+  readOnly: boolean;
+  providerId: "google" | "microsoft";
   accountId: string;
   calendarId: string;
   metadata?: Record<string, unknown>;
+  conference?: Conference;
 }
 
 export interface Attendee {
@@ -60,16 +63,17 @@ export interface CalendarProvider {
   ): Promise<Calendar>;
   deleteCalendar(calendarId: string): Promise<void>;
   events(
-    calendarId: string,
+    calendar: Calendar,
     timeMin: Temporal.ZonedDateTime,
     timeMax: Temporal.ZonedDateTime,
+    timeZone?: string,
   ): Promise<CalendarEvent[]>;
   createEvent(
-    calendarId: string,
+    calendar: Calendar,
     event: CreateEventInput,
   ): Promise<CalendarEvent>;
   updateEvent(
-    calendarId: string,
+    calendar: Calendar,
     eventId: string,
     event: UpdateEventInput,
   ): Promise<CalendarEvent>;
@@ -82,4 +86,45 @@ export interface CalendarProvider {
       comment?: string;
     },
   ): Promise<void>;
+}
+
+export interface ConferencingProvider {
+  providerId: "zoom" | "google";
+  createConference(
+    agenda: string,
+    startTime: string,
+    endTime: string,
+    timeZone?: string,
+    calendarId?: string,
+    eventId?: string,
+  ): Promise<Conference>;
+}
+
+export interface Conference {
+  /** Provider-specific meeting identifier (e.g. Google Meet code, Zoom UUID). */
+  id?: string;
+
+  /** Human-friendly provider or meeting name (e.g. "Google Meet", "Teams"). */
+  name?: string;
+
+  /** Primary join URL for participants (video URL). */
+  joinUrl?: string;
+
+  /** Host-only URL when the provider differentiates (e.g. Zoom start_url). */
+  hostUrl?: string;
+
+  /** Meeting code or numeric ID displayed to users. */
+  meetingCode?: string;
+
+  /** Password / pass-code if required to join. */
+  password?: string;
+
+  /** One or more dial-in phone numbers (E.164 / plain). */
+  phoneNumbers?: string[];
+
+  /** Additional free-form notes such as SIP information. */
+  notes?: string;
+
+  /** Provider-specific extra fields preserved for debugging / extensions. */
+  extra?: Record<string, unknown>;
 }

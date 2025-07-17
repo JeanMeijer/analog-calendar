@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { providers } from "@/lib/constants";
+import { ProviderId, providers } from "@/lib/providers";
 
 interface AddAccountDialogProps {
   children: React.ReactNode;
@@ -25,11 +25,11 @@ export function AddAccountDialog({ children }: AddAccountDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState<string | null>(null);
 
-  const handleLinkAccount = async (provider: string) => {
+  const handleLinkAccount = async (provider: ProviderId) => {
     try {
       setIsLoading(provider);
       await authClient.linkSocial({
-        provider: provider as "google" | "microsoft",
+        provider: provider,
         callbackURL: "/calendar",
       });
       setOpen(false);
@@ -54,14 +54,14 @@ export function AddAccountDialog({ children }: AddAccountDialogProps) {
         <div className="space-y-2">
           {providers.map((provider) => (
             <Button
-              key={provider.providerId}
+              key={provider.id}
               variant="outline"
               className="w-full justify-start"
-              onClick={() => handleLinkAccount(provider.providerId)}
-              disabled={isLoading === provider.providerId}
+              onClick={() => handleLinkAccount(provider.id)}
+              disabled={isLoading === provider.id}
             >
               <Plus className="mr-2 h-4 w-4" />
-              {isLoading === provider.providerId
+              {isLoading === provider.id
                 ? "Connecting..."
                 : `Add ${provider.name}`}
             </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import * as React from "react";
 import { RiCalendarEventLine } from "@remixicon/react";
 import { addDays, format, isToday } from "date-fns";
 
@@ -9,21 +9,22 @@ import {
   CalendarEvent,
   EventItem,
 } from "@/components/event-calendar";
+import type { Action } from "@/components/event-calendar/hooks/use-optimistic-events";
 import { getAllEventsForDay } from "@/components/event-calendar/utils";
 
 interface AgendaViewProps {
   currentDate: Date;
   events: CalendarEvent[];
-  onEventSelect: (event: CalendarEvent) => void;
+  dispatchAction: (action: Action) => void;
 }
 
 export function AgendaView({
   currentDate,
   events,
-  onEventSelect,
+  dispatchAction,
 }: AgendaViewProps) {
   // Show events for the next days based on constant
-  const days = useMemo(() => {
+  const days = React.useMemo(() => {
     return Array.from({ length: AgendaDaysToShow }, (_, i) =>
       addDays(new Date(currentDate), i),
     );
@@ -31,8 +32,7 @@ export function AgendaView({
 
   const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log("Agenda view event clicked:", event);
-    onEventSelect(event);
+    dispatchAction({ type: "select", event });
   };
 
   // Check if there are any days with events

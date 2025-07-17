@@ -17,3 +17,9 @@ export {
   type CalendarSettings,
   useCalendarSettings,
 } from "./calendar-settings";
+
+export {
+  selectedEventsAtom,
+  type SelectedEvents,
+  useSelectedEvents,
+} from "./selected-events";

@@ -5,8 +5,12 @@ import { z } from "zod";
 import { auth } from "@repo/auth/server";
 import { user } from "@repo/db/schema";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { getAccounts, getActiveAccount } from "../utils/accounts";
+import {
+  calendarProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+} from "../trpc";
+import { getAccounts, getDefaultAccount } from "../utils/accounts";
 
 export const accountsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -15,6 +19,7 @@ export const accountsRouter = createTRPCRouter({
     return {
       accounts: accounts.map((account) => ({
         id: account.id,
+        accountId: account.accountId,
         providerId: account.providerId,
         name: account.name,
         email: account.email,
@@ -24,31 +29,20 @@ export const accountsRouter = createTRPCRouter({
       })),
     };
   }),
-  setDefault: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const foundAccount = await ctx.db.query.account.findFirst({
-        where: (table, { eq }) => eq(table.id, input.id),
-      });
-
-      if (!foundAccount) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Account not found",
-        });
-      }
-
-      await ctx.db
-        .update(user)
-        .set({ defaultAccountId: input.id })
-        .where(eq(user.id, ctx.user.id));
-    }),
   getDefault: protectedProcedure.query(async ({ ctx }) => {
-    const account = await getActiveAccount(ctx.user, ctx.headers);
+    const account = await getDefaultAccount(ctx.user, ctx.headers);
+
+    if (!account) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Account not found",
+      });
+    }
 
     return {
       account: {
         id: account.id,
+        accountId: account.accountId,
         providerId: account.providerId,
         name: account.name,
         email: account.email,
@@ -58,7 +52,7 @@ export const accountsRouter = createTRPCRouter({
       },
     };
   }),
-  delete: protectedProcedure
+  unlink: calendarProcedure
     .input(
       z.object({
         id: z.string(),
@@ -66,6 +60,8 @@ export const accountsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const defaultAccount = await getDefaultAccount(ctx.user, ctx.headers);
+
       await auth.api.unlinkAccount({
         body: {
           accountId: input.id,
@@ -74,13 +70,26 @@ export const accountsRouter = createTRPCRouter({
         headers: ctx.headers,
       });
 
-      const activeAccount = await getActiveAccount(ctx.user, ctx.headers);
-
-      if (activeAccount.id === input.id) {
-        await ctx.db
-          .update(user)
-          .set({ defaultAccountId: null })
-          .where(eq(user.id, ctx.user.id));
+      if (defaultAccount.id !== input.id) {
+        return;
       }
+
+      const newDefaultAccount = await ctx.db.query.account.findFirst({
+        where: (table, { eq }) => eq(table.userId, ctx.user.id),
+      });
+
+      const account = ctx.providers.find(
+        (provider) => provider.account.id === newDefaultAccount?.id,
+      );
+      const calendars = await account?.client.calendars();
+      const primaryCalendar = calendars?.find((calendar) => calendar.primary);
+
+      await ctx.db
+        .update(user)
+        .set({
+          defaultAccountId: newDefaultAccount?.id,
+          defaultCalendarId: primaryCalendar?.id,
+        })
+        .where(eq(user.id, ctx.user.id));
     }),
 });

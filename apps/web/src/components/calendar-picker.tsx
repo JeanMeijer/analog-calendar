@@ -4,8 +4,6 @@ import * as React from "react";
 import { useResizeObserver } from "@react-hookz/web";
 import { useQuery } from "@tanstack/react-query";
 
-import { Calendar } from "@repo/api/providers/interfaces";
-
 import { useCalendarsVisibility } from "@/atoms";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +19,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Calendar } from "@/lib/interfaces";
+import { RouterOutputs } from "@/lib/trpc";
 import { useTRPC } from "@/lib/trpc/client";
+import { cn } from "@/lib/utils";
 import { CalendarToggle } from "./calendar-toggle";
 
 interface VisibleCalendarProps {
@@ -35,7 +36,7 @@ function VisibleCalendars({ calendars }: VisibleCalendarProps) {
         ?.slice(0, calendars.length > 3 ? 3 : calendars.length)
         .map((calendar) => (
           <div
-            key={calendar.id}
+            key={`${calendar.accountId}.${calendar.id}`}
             className="size-4 rounded-full bg-(--calendar-color) ring-2 ring-background group-hover/trigger:ring-border"
             style={
               {
@@ -161,6 +162,82 @@ export function CalendarPicker() {
                       calendar={calendar}
                       key={`${account.id}-${calendar.id}`}
                     />
+                  ))}
+                </CommandGroup>
+              ))}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+export type CalenderAccount = RouterOutputs["calendars"]["list"]["accounts"][0];
+
+interface CalendarListPickerProps extends React.ComponentProps<typeof Popover> {
+  items: CalenderAccount[];
+  value?: Calendar;
+  onSelect?: (calendar: Calendar) => void;
+}
+
+export function CalendarListPicker({
+  children,
+  items,
+  onSelect,
+  ...props
+}: CalendarListPickerProps) {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <div className="flex items-center space-x-4">
+      <Popover open={open} onOpenChange={setOpen} {...props}>
+        {children}
+        <PopoverContent
+          className="w-fit max-w-96 min-w-(--radix-popper-anchor-width) p-0"
+          align="end"
+          side="bottom"
+          sideOffset={4}
+        >
+          <Command>
+            <CommandInput placeholder="Search calendars..." />
+            <CommandList>
+              <CommandEmpty>No results found.</CommandEmpty>
+
+              {items.map((account) => (
+                <CommandGroup
+                  heading={account.name}
+                  key={account.id}
+                  value={account.name}
+                >
+                  {account.calendars.map((calendar) => (
+                    <CommandItem
+                      value={`${calendar.name}`}
+                      key={`${account.id}-${calendar.id}`}
+                      onSelect={() => {
+                        onSelect?.(calendar);
+                        setOpen(false);
+                      }}
+                      disabled={calendar.readOnly}
+                    >
+                      <div className="size-5 p-1">
+                        <div
+                          className={cn(
+                            "size-3 rounded-[4px] bg-(--calendar-color)",
+                            calendar.primary &&
+                              "outline-2 outline-offset-2 outline-(--calendar-color)",
+                          )}
+                          style={
+                            {
+                              "--calendar-color":
+                                calendar.color ??
+                                "var(--color-muted-foreground)",
+                            } as React.CSSProperties
+                          }
+                        />
+                      </div>
+                      {calendar.name}
+                    </CommandItem>
                   ))}
                 </CommandGroup>
               ))}

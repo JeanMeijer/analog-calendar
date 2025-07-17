@@ -42,11 +42,12 @@ export class MicrosoftCalendarProvider implements CalendarProvider {
     return this.withErrorHandler("calendars", async () => {
       // Microsoft Graph API does not work without $select due to a bug
       const response = await this.graphClient
-        .api("/me/calendars?$select=id,name,isDefaultCalendar")
+        .api(
+          "/me/calendars?$select=id,name,isDefaultCalendar,canEdit,hexColor,isRemovable,owner,calendarPermissions",
+        )
         .get();
-      const data = response.value as MicrosoftCalendar[];
 
-      return data.map((calendar, idx) => ({
+      return (response.value as MicrosoftCalendar[]).map((calendar, idx) => ({
         ...parseMicrosoftCalendar({ calendar, accountId: this.accountId }),
         color: assignColor(idx),
       }));
@@ -55,9 +56,9 @@ export class MicrosoftCalendarProvider implements CalendarProvider {
 
   async createCalendar(calendarData: CreateCalendarInput): Promise<Calendar> {
     return this.withErrorHandler("createCalendar", async () => {
-      const createdCalendar = (await this.graphClient
+      const createdCalendar: MicrosoftCalendar = await this.graphClient
         .api("/me/calendars")
-        .post(calendarData)) as MicrosoftCalendar;
+        .post(calendarData);
 
       return parseMicrosoftCalendar({
         calendar: createdCalendar,
@@ -71,9 +72,9 @@ export class MicrosoftCalendarProvider implements CalendarProvider {
     calendar: UpdateCalendarInput,
   ): Promise<Calendar> {
     return this.withErrorHandler("updateCalendar", async () => {
-      const updatedCalendar = (await this.graphClient
+      const updatedCalendar: MicrosoftCalendar = await this.graphClient
         .api(calendarPath(calendarId))
-        .patch(calendar)) as MicrosoftCalendar;
+        .patch(calendar);
 
       return parseMicrosoftCalendar({
         calendar: updatedCalendar,
@@ -89,16 +90,18 @@ export class MicrosoftCalendarProvider implements CalendarProvider {
   }
 
   async events(
-    calendarId: string,
+    calendar: Calendar,
     timeMin: Temporal.ZonedDateTime,
     timeMax: Temporal.ZonedDateTime,
+    timeZone: string,
   ): Promise<CalendarEvent[]> {
     return this.withErrorHandler("events", async () => {
       const startTime = timeMin.withTimeZone("UTC").toInstant().toString();
       const endTime = timeMax.withTimeZone("UTC").toInstant().toString();
 
       const response = await this.graphClient
-        .api(`${calendarPath(calendarId)}/events`)
+        .api(`${calendarPath(calendar.id)}/events`)
+        .header("Prefer", `outlook.timezone="${timeZone}"`)
         .filter(
           `start/dateTime ge '${startTime}' and end/dateTime le '${endTime}'`,
         )
@@ -107,24 +110,24 @@ export class MicrosoftCalendarProvider implements CalendarProvider {
         .get();
 
       return (response.value as MicrosoftEvent[]).map((event: MicrosoftEvent) =>
-        parseMicrosoftEvent({ event, accountId: this.accountId, calendarId }),
+        parseMicrosoftEvent({ event, accountId: this.accountId, calendar }),
       );
     });
   }
 
   async createEvent(
-    calendarId: string,
+    calendar: Calendar,
     event: CreateEventInput,
   ): Promise<CalendarEvent> {
     return this.withErrorHandler("createEvent", async () => {
-      const createdEvent = (await this.graphClient
-        .api(calendarPath(calendarId))
-        .post(toMicrosoftEvent(event))) as MicrosoftEvent;
+      const createdEvent: MicrosoftEvent = await this.graphClient
+        .api(`${calendarPath(calendar.id)}/events`)
+        .post(toMicrosoftEvent(event));
 
       return parseMicrosoftEvent({
         event: createdEvent,
         accountId: this.accountId,
-        calendarId,
+        calendar,
       });
     });
   }
@@ -138,19 +141,19 @@ export class MicrosoftCalendarProvider implements CalendarProvider {
    * @returns The updated transformed Event object
    */
   async updateEvent(
-    calendarId: string,
+    calendar: Calendar,
     eventId: string,
     event: UpdateEventInput,
   ): Promise<CalendarEvent> {
     return this.withErrorHandler("updateEvent", async () => {
-      const updatedEvent = (await this.graphClient
-        .api(`${calendarPath(calendarId)}/events/${eventId}`)
-        .patch(toMicrosoftEvent(event))) as MicrosoftEvent;
+      const updatedEvent: MicrosoftEvent = await this.graphClient
+        .api(`${calendarPath(calendar.id)}/events/${eventId}`)
+        .patch(toMicrosoftEvent(event));
 
       return parseMicrosoftEvent({
         event: updatedEvent,
         accountId: this.accountId,
-        calendarId,
+        calendar,
       });
     });
   }

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { useViewPreferences } from "@/atoms";
-import { isWeekend, isWeekendIndex } from "../utils/date-time";
+import { isWeekend } from "../utils/date-time";
 
 interface GridLayoutOptions {
   /**
@@ -28,13 +28,13 @@ export function useGridLayout(days: Date[], options: GridLayoutOptions = {}) {
   const viewPreferences = useViewPreferences();
 
   const gridTemplateColumns = useMemo(() => {
-    const columnSizes = days.map((day, index) => {
-      const isDayVisible =
-        days.length === 7
-          ? viewPreferences.showWeekends || !isWeekendIndex(index)
-          : viewPreferences.showWeekends || !isWeekend(day);
+    const columnSizes = days.map((day) => {
+      // A day is visible if either the user wants to show weekends or the day is **not** a weekend.
+      // We always rely on the actual `Date` object instead of a numeric index so that the check works
+      // regardless of what day the week starts on (Monday-first, Sunday-first, etc.).
+      const isDayVisible = viewPreferences.showWeekends || !isWeekend(day);
 
-      return isDayVisible ? "1fr" : "0fr";
+      return isDayVisible ? "minmax(0,1fr)" : "0fr";
     });
 
     const dayColumns = columnSizes.join(" ");

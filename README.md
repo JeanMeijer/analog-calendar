@@ -96,10 +96,6 @@ The application should now be accessible in your browser at [http://localhost:30
 - **Database**: Drizzle with PostgreSQL
 - **Authentication**: Better Auth for Google OAuth
 
-## Features
-
-WIP.
-
 ## Roadmap
 
 WIP.

@@ -6,7 +6,9 @@ import { SimpleAnalytics } from "@simpleanalytics/next";
 
 import ogImage from "@/assets/og-image.png";
 import { Toaster } from "@/components/ui/sonner";
+
 import "./globals.css";
+
 import { Providers } from "./providers";
 
 const geistSans = Geist({
@@ -67,7 +69,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${satoshi.variable} flex min-h-screen flex-col antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${satoshi.variable} flex min-h-screen flex-col`}
       >
         <Providers>
           <Toaster richColors closeButton position="bottom-right" />

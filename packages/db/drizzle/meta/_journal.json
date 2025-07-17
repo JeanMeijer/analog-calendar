@@ -22,6 +22,20 @@
       "when": 1748881983618,
       "tag": "0002_lean_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1751295249716,
+      "tag": "0003_steep_salo",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1751332331486,
+      "tag": "0004_wet_lady_mastermind",
+      "breakpoints": true
     }
   ]
 }

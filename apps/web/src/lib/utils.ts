@@ -22,3 +22,33 @@ export function groupArrayIntoChunks<T>(array: T[], chunkSize: number): T[][] {
   }
   return chunks;
 }
+
+export function getConferencingProviderId(uri?: string) {
+  try {
+    if (!uri) {
+      return "none";
+    }
+
+    const url = new URL(uri);
+    const hostname = url.hostname.toLowerCase();
+
+    if (
+      hostname.includes("meet.google.com") ||
+      hostname.includes("hangouts.google.com")
+    ) {
+      return "google";
+    }
+
+    if (hostname.includes("zoom.us") || hostname.includes("zoom.com")) {
+      return "zoom";
+    }
+
+    return "none";
+  } catch {
+    // Fallback to string matching for non-URL strings
+    const lowerUri = uri?.toLowerCase();
+    if (lowerUri?.includes("google")) return "google";
+    if (lowerUri?.includes("zoom")) return "zoom";
+    return "none";
+  }
+}

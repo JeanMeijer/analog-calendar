@@ -1,5 +1,6 @@
 {
   "importOrder": [
+    "<BUILTIN_MODULES>",
     "^(react/(.*)$)|^(react$)",
     "^(next/(.*)$)|^(next$)",
     "<THIRD_PARTY_MODULES>",
@@ -10,12 +11,8 @@
     "^[../]",
     "^[./]"
   ],
-  "importOrderSeparation": false,
-  "importOrderSortSpecifiers": true,
-  "importOrderBuiltinModulesToTop": true,
   "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
-  "importOrderMergeDuplicateImports": true,
-  "importOrderCombineTypeAndValueImports": true,
+  "importOrderCaseSensitive": true,
   "tailwindStylesheet": "./apps/web/src/app/globals.css",
   "plugins": [
     "@ianvs/prettier-plugin-sort-imports",

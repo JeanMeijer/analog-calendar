@@ -20,7 +20,6 @@ const DefaultEndHour = 10;
 const CALENDAR_CONFIG = {
   TIME_RANGE_DAYS_PAST: 30,
   TIME_RANGE_DAYS_FUTURE: 60,
-  DEFAULT_CALENDAR_ID: "primary",
   WEEK_STARTS_ON: 0, // Sunday
 } as const;
 

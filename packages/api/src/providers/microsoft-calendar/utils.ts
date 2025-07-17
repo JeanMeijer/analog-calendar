@@ -1,3 +1,4 @@
+import { detectMeetingLink } from "@analog/meeting-links";
 import type {
   Calendar as MicrosoftCalendar,
   Event as MicrosoftEvent,
@@ -16,6 +17,7 @@ import type {
   AttendeeStatus,
   Calendar,
   CalendarEvent,
+  Conference,
 } from "../interfaces";
 import { mapWindowsToIanaTimeZone } from "./windows-timezones";
 
@@ -93,13 +95,13 @@ function parseDateTime(dateTime: string, timeZone: string) {
 
 interface ParseMicrosoftEventOptions {
   accountId: string;
-  calendarId: string;
+  calendar: Calendar;
   event: MicrosoftEvent;
 }
 
 export function parseMicrosoftEvent({
   accountId,
-  calendarId,
+  calendar,
   event,
 }: ParseMicrosoftEventOptions): CalendarEvent {
   const { start, end, isAllDay } = event;
@@ -126,7 +128,9 @@ export function parseMicrosoftEvent({
     color: undefined,
     providerId: "microsoft",
     accountId,
-    calendarId,
+    calendarId: calendar.id,
+    readOnly: calendar.readOnly,
+    conference: parseMicrosoftConference(event),
     metadata: {
       ...(event.originalStartTimeZone
         ? {
@@ -152,7 +156,9 @@ export function parseMicrosoftEvent({
   };
 }
 
-export function toMicrosoftEvent(event: CreateEventInput | UpdateEventInput) {
+export function toMicrosoftEvent(
+  event: CreateEventInput | UpdateEventInput,
+): MicrosoftEvent {
   const metadata = event.metadata as MicrosoftEventMetadata | undefined;
 
   return {
@@ -170,6 +176,17 @@ export function toMicrosoftEvent(event: CreateEventInput | UpdateEventInput) {
     }),
     isAllDay: event.allDay ?? false,
     location: event.location ? { displayName: event.location } : undefined,
+    // ...(event.conference && {
+    //   isOnlineMeeting: true,
+    //   onlineMeeting: {
+    //     conferenceId: event.conference.id,
+    //     joinUrl: event.conference.joinUrl,
+    //     phones: event.conference.phoneNumbers?.map((number) => ({
+    //       number,
+    //     })),
+    //   },
+    //   onlineMeetingProvider: "unknown",
+    // }),
   };
 }
 
@@ -189,6 +206,7 @@ export function parseMicrosoftCalendar({
     primary: calendar.isDefaultCalendar as boolean,
     accountId,
     color: calendar.hexColor as string,
+    readOnly: !calendar.canEdit,
   };
 }
 
@@ -196,6 +214,60 @@ export function calendarPath(calendarId: string) {
   return calendarId === "primary"
     ? "/me/calendar"
     : `/me/calendars/${calendarId}`;
+}
+
+function parseConferenceFallback(
+  event: MicrosoftEvent,
+): Conference | undefined {
+  if (!event.location) {
+    return undefined;
+  }
+
+  if (event.location.locationUri) {
+    const service = detectMeetingLink(event.location.locationUri);
+
+    if (service) {
+      return service;
+    }
+  }
+
+  if (!event.location.displayName) {
+    return undefined;
+  }
+
+  const service = detectMeetingLink(event.location.displayName);
+
+  if (!service) {
+    return undefined;
+  }
+
+  return service;
+}
+
+function parseMicrosoftConference(
+  event: MicrosoftEvent,
+): Conference | undefined {
+  const joinUrl = event.onlineMeeting?.joinUrl ?? event.onlineMeetingUrl;
+
+  if (!joinUrl) {
+    return parseConferenceFallback(event);
+  }
+
+  const phoneNumbers = event.onlineMeeting?.phones
+    ?.map((p) => p.number)
+    .filter((n): n is string => Boolean(n));
+
+  return {
+    id: event.onlineMeeting?.conferenceId ?? undefined,
+    name:
+      event.onlineMeetingProvider === "teamsForBusiness"
+        ? "Microsoft Teams"
+        : "Online Meeting",
+    joinUrl,
+    meetingCode: event.onlineMeeting?.conferenceId ?? undefined,
+    phoneNumbers:
+      phoneNumbers && phoneNumbers.length ? phoneNumbers : undefined,
+  };
 }
 
 export function eventResponseStatusPath(

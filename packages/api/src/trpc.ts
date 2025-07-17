@@ -1,11 +1,12 @@
 import "server-only";
+
 import { TRPCError, initTRPC } from "@trpc/server";
 import { ZodError } from "zod";
 
 import { auth } from "@repo/auth/server";
 import { db } from "@repo/db";
 
-import { accountToProvider } from "./providers";
+import { accountToProvider, isCalendarProvider } from "./providers";
 import { getAccounts } from "./utils/accounts";
 import { superjson } from "./utils/superjson";
 
@@ -61,10 +62,15 @@ export const calendarProcedure = protectedProcedure.use(
     try {
       const accounts = await getAccounts(ctx.user, ctx.headers);
 
-      const providers = accounts.map((account) => ({
-        account,
-        client: accountToProvider(account),
-      }));
+      const providers = accounts
+        .filter((provider) => isCalendarProvider(provider.providerId))
+        .map((account) => ({
+          account: {
+            ...account,
+            providerId: account.providerId as "google" | "microsoft",
+          },
+          client: accountToProvider(account),
+        }));
 
       return next({
         ctx: {

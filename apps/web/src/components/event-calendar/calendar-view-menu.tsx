@@ -127,10 +127,10 @@ export function CalendarViewMenu({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="h-8 gap-1.5">
           <span>
-            <span className="min-[480px]:hidden" aria-hidden="true">
+            <span className="@min-md/header:hidden" aria-hidden="true">
               {currentView.charAt(0).toUpperCase()}
             </span>
-            <span className="max-[479px]:sr-only">{viewDisplayName}</span>
+            <span className="@max-md/header:sr-only">{viewDisplayName}</span>
           </span>
           <ChevronDownIcon
             className="-me-1 opacity-60"

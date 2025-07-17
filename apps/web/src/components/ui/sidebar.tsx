@@ -449,12 +449,20 @@ function SidebarTrigger({
   );
 }
 
-const SidebarRail = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button"> & {
-    enableDrag?: boolean;
-  }
->(({ className, enableDrag = true, ...props }, ref) => {
+interface SidebarRailProps extends React.ComponentPropsWithRef<typeof Button> {
+  enableDrag?: boolean;
+  minSidebarWidth?: string;
+  maxSidebarWidth?: string;
+}
+
+function SidebarRail({
+  className,
+  enableDrag = true,
+  minSidebarWidth = MIN_SIDEBAR_WIDTH,
+  maxSidebarWidth = MAX_SIDEBAR_WIDTH,
+  ref,
+  ...props
+}: SidebarRailProps) {
   const { toggleSidebar, setWidth, state, width, setIsDraggingRail, side } =
     useSidebar();
 
@@ -465,17 +473,20 @@ const SidebarRail = React.forwardRef<
     onToggle: toggleSidebar,
     currentWidth: width!,
     isCollapsed: state === "collapsed",
-    minResizeWidth: MIN_SIDEBAR_WIDTH,
-    maxResizeWidth: MAX_SIDEBAR_WIDTH,
+    minResizeWidth: minSidebarWidth,
+    maxResizeWidth: maxSidebarWidth,
     setIsDraggingRail,
     widthCookieName: `sidebar:width:${side}`,
     widthCookieMaxAge: 60 * 60 * 24 * 7,
   });
 
-  const combinedRef = React.useMemo(
-    () => mergeButtonRefs([ref, dragRef]),
-    [ref, dragRef],
-  );
+  const combinedRef = React.useMemo(() => {
+    if (!ref) {
+      return dragRef;
+    }
+
+    return mergeButtonRefs([ref, dragRef]);
+  }, [ref, dragRef]);
 
   return (
     <button
@@ -495,8 +506,7 @@ const SidebarRail = React.forwardRef<
       {...props}
     />
   );
-});
-SidebarRail.displayName = "SidebarRail";
+}
 
 function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
   return (

@@ -15,7 +15,7 @@ export function CalendarNavigation() {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex items-center sm:gap-1">
+      <div className="flex items-center gap-1">
         <Tooltip delayDuration={1000}>
           <TooltipTrigger asChild>
             <Button
@@ -51,7 +51,7 @@ export function CalendarNavigation() {
       </div>
       <Button
         variant="outline"
-        className="aspect-square h-8"
+        className="aspect-square h-8 @max-md/header:hidden"
         onClick={handleToday}
       >
         Today

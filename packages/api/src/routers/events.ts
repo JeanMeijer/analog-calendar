@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { toInstant } from "@repo/temporal";
 
+import { CalendarEvent } from "../providers/interfaces";
 import {
   createEventInputSchema,
   updateEventInputSchema,
@@ -18,6 +19,7 @@ export const eventsRouter = createTRPCRouter({
         calendarIds: z.array(z.string()).default([]),
         timeMin: zZonedDateTimeInstance,
         timeMax: zZonedDateTimeInstance,
+        defaultTimeZone: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -33,16 +35,17 @@ export const eventsRouter = createTRPCRouter({
           const providerEvents = await Promise.all(
             requestedCalendars.map(async (calendar) => {
               const events = await client.events(
-                calendar.id,
+                calendar,
                 input.timeMin,
                 input.timeMax,
+                input.defaultTimeZone,
               );
 
               return events.map((event) => ({
                 ...event,
                 calendarId: calendar.id,
                 providerId: account.providerId,
-                accountId: account.id,
+                accountId: account.accountId,
                 color: calendar.color,
               }));
             }),
@@ -52,7 +55,7 @@ export const eventsRouter = createTRPCRouter({
         }),
       );
 
-      const events = allEvents
+      const events: CalendarEvent[] = allEvents
         .flat()
         .map(
           (v) => [v, toInstant({ value: v.start, timeZone: "UTC" })] as const,
@@ -62,12 +65,11 @@ export const eventsRouter = createTRPCRouter({
 
       return { events };
     }),
-
   create: calendarProcedure
     .input(createEventInputSchema)
     .mutation(async ({ ctx, input }) => {
       const provider = ctx.providers.find(
-        ({ account }) => account.id === input.accountId,
+        ({ account }) => account.accountId === input.accountId,
       );
 
       if (!provider?.client) {
@@ -77,9 +79,18 @@ export const eventsRouter = createTRPCRouter({
         });
       }
 
-      const event = await provider.client.createEvent(input.calendarId, {
-        ...input,
-      });
+      const calendars = await provider.client.calendars();
+
+      const calendar = calendars.find((c) => c.id === input.calendarId);
+
+      if (!calendar) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Calendar not found for accountId: ${input.calendarId}`,
+        });
+      }
+
+      const event = await provider.client.createEvent(calendar, input);
 
       return { event };
     }),
@@ -87,7 +98,7 @@ export const eventsRouter = createTRPCRouter({
     .input(updateEventInputSchema)
     .mutation(async ({ ctx, input }) => {
       const provider = ctx.providers.find(
-        ({ account }) => account.id === input.accountId,
+        ({ account }) => account.accountId === input.accountId,
       );
 
       if (!provider?.client) {
@@ -97,8 +108,19 @@ export const eventsRouter = createTRPCRouter({
         });
       }
 
+      const calendars = await provider.client.calendars();
+
+      const calendar = calendars.find((c) => c.id === input.calendarId);
+
+      if (!calendar) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Calendar not found for accountId: ${input.accountId}`,
+        });
+      }
+
       const event = await provider.client.updateEvent(
-        input.calendarId,
+        calendar,
         input.id,
         input,
       );
@@ -115,7 +137,7 @@ export const eventsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const provider = ctx.providers.find(
-        ({ account }) => account.id === input.accountId,
+        ({ account }) => account.accountId === input.accountId,
       );
 
       if (!provider?.client) {
@@ -143,7 +165,7 @@ export const eventsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const provider = ctx.providers.find(
-        ({ account }) => account.id === input.accountId,
+        ({ account }) => account.accountId === input.accountId,
       );
 
       if (!provider?.client) {

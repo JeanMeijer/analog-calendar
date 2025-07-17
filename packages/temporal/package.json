@@ -6,7 +6,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
     "temporal-polyfill": "^0.3.0"
@@ -14,8 +15,8 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20.19.1",
-    "eslint": "^9.29.0",
+    "@types/node": "^22.9.0",
+    "eslint": "^9.30.1",
     "typescript": "^5.8.3"
   }
 }

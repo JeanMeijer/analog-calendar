@@ -21,6 +21,7 @@ import {
   subMonths,
   subWeeks,
 } from "date-fns";
+import { Temporal } from "temporal-polyfill";
 
 import {
   AgendaDaysToShow,
@@ -160,6 +161,17 @@ export function getViewTitleData(currentDate: Date, view: CalendarView) {
     default:
       return getMonthTitle(currentDate);
   }
+}
+
+export function getWeekNumber(
+  currentDate: Date,
+  view: CalendarView,
+): number | undefined {
+  if (view === "month") {
+    return undefined;
+  }
+
+  return Temporal.PlainDate.from(format(currentDate, "yyyy-MM-dd")).weekOfYear;
 }
 
 export function isWeekend(date: Date): boolean {
