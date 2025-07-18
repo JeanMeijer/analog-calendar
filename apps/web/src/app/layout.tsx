@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { SimpleAnalytics } from "@simpleanalytics/next";
+import { BotIdClient } from "botid/client";
 
 import ogImage from "@/assets/og-image.png";
 import { Toaster } from "@/components/ui/sonner";
@@ -10,6 +11,13 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 import { Providers } from "./providers";
+
+const protectedRoutes = [
+  {
+    path: "/api/trpc/*",
+    method: "POST",
+  },
+];
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,6 +76,9 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <BotIdClient protect={protectedRoutes} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${satoshi.variable} flex min-h-screen flex-col`}
       >

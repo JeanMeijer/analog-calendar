@@ -54,6 +54,7 @@
     "@trpc/tanstack-react-query": "^11.4.3",
     "ai": "^4.3.17",
     "better-auth": "^1.2.12",
+    "botid": "1.4.2",
     "chrono-node": "^2.8.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

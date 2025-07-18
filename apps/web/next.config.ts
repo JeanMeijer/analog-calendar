@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import withSimpleAnalytics from "@simpleanalytics/next/plugin";
+import { withBotId } from "botid/next/config";
 
 const nextConfig: NextConfig = {
   async redirects() {
@@ -49,4 +50,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSimpleAnalytics(nextConfig);
+export default withSimpleAnalytics(withBotId(nextConfig));

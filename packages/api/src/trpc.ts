@@ -1,6 +1,7 @@
 import "server-only";
 
 import { TRPCError, initTRPC } from "@trpc/server";
+import { checkBotId } from "botid/server";
 import { ZodError } from "zod";
 
 import { auth } from "@repo/auth/server";
@@ -41,7 +42,16 @@ export const createCallerFactory = t.createCallerFactory;
 
 export const createTRPCRouter = t.router;
 
-export const publicProcedure = t.procedure;
+const botIdMiddleware = t.middleware(async ({ next }) => {
+  const verification = await checkBotId();
+  if (verification.isBot) {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+
+  return next();
+});
+
+export const publicProcedure = t.procedure.use(botIdMiddleware);
 
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.user) {
