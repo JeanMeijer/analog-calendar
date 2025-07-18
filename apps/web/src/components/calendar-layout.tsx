@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 
@@ -12,7 +12,8 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { CalendarView } from "@/components/calendar-view";
 import { EventForm } from "@/components/event-form/event-form";
 import { RightSidebar } from "@/components/right-sidebar";
-import { SidebarInset } from "@/components/ui/sidebar";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { SidebarInset, useSidebarWithSide } from "@/components/ui/sidebar";
 import { EventHotkeys } from "@/lib/hotkeys/event-hotkeys";
 import { useTRPC } from "@/lib/trpc/client";
 import { useOptimisticEvents } from "./event-calendar/hooks/use-optimistic-events";
@@ -29,7 +30,7 @@ export function CalendarLayout() {
 
   return (
     <>
-      <AppSidebar variant="inset" side="left" />
+      <AppSidebar variant="inset" side="left" className="hidden md:flex" />
       <IsolatedCalendarLayout />
     </>
   );
@@ -41,6 +42,14 @@ function IsolatedCalendarLayout() {
 
   const { events, selectedEvents, dispatchAction, dispatchAsyncAction } =
     useOptimisticEvents();
+  const { openMobile, setOpenMobile } = useSidebarWithSide("right");
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsMobile(window.innerWidth < 768);
+    }
+  }, []);
 
   return (
     <>
@@ -48,6 +57,21 @@ function IsolatedCalendarLayout() {
         selectedEvent={selectedEvents[0]}
         dispatchAction={dispatchAction}
       />
+      {(isMobile ?? true) && (
+        <Drawer
+          open={openMobile}
+          onOpenChange={setOpenMobile}
+          className="md:hidden"
+        >
+          <DrawerContent className="max-h-[80vh] overflow-y-auto">
+            <EventForm
+              selectedEvent={selectedEvents[0]}
+              dispatchAsyncAction={dispatchAsyncAction}
+              defaultCalendar={query.data?.defaultCalendar}
+            />
+          </DrawerContent>
+        </Drawer>
+      )}
       <SidebarInset className="h-full overflow-hidden">
         <div className="flex h-[calc(100dvh-1rem)]">
           <CalendarView
@@ -57,13 +81,15 @@ function IsolatedCalendarLayout() {
           />
         </div>
       </SidebarInset>
-      <RightSidebar variant="inset" side="right">
-        <EventForm
-          selectedEvent={selectedEvents[0]}
-          dispatchAsyncAction={dispatchAsyncAction}
-          defaultCalendar={query.data?.defaultCalendar}
-        />
-      </RightSidebar>
+      {(isMobile === undefined || !isMobile) && (
+        <RightSidebar variant="inset" side="right" className="hidden md:flex">
+          <EventForm
+            selectedEvent={selectedEvents[0]}
+            dispatchAsyncAction={dispatchAsyncAction}
+            defaultCalendar={query.data?.defaultCalendar}
+          />
+        </RightSidebar>
+      )}
     </>
   );
 }
