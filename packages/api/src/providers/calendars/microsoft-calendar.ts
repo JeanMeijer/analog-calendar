@@ -5,24 +5,27 @@ import type {
 } from "@microsoft/microsoft-graph-types";
 import { Temporal } from "temporal-polyfill";
 
-import { CALENDAR_DEFAULTS } from "../constants/calendar";
-import { CreateCalendarInput, UpdateCalendarInput } from "../schemas/calendars";
-import { CreateEventInput, UpdateEventInput } from "../schemas/events";
-import { assignColor } from "./colors";
+import { CALENDAR_DEFAULTS } from "../../constants/calendar";
+import {
+  CreateCalendarInput,
+  UpdateCalendarInput,
+} from "../../schemas/calendars";
+import { CreateEventInput, UpdateEventInput } from "../../schemas/events";
+import { assignColor } from "../colors";
 import type {
   Calendar,
   CalendarEvent,
   CalendarProvider,
   ResponseToEventInput,
-} from "./interfaces";
+} from "../interfaces";
 import {
   calendarPath,
   eventResponseStatusPath,
   parseMicrosoftCalendar,
   parseMicrosoftEvent,
   toMicrosoftEvent,
-} from "./microsoft-calendar/utils";
-import { ProviderError } from "./utils";
+} from "../microsoft-calendar/utils";
+import { ProviderError } from "../utils";
 
 interface MicrosoftCalendarProviderOptions {
   accessToken: string;

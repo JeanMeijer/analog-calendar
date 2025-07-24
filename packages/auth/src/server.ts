@@ -25,6 +25,7 @@ export const GOOGLE_OAUTH_SCOPES = [
   "profile",
   "openid",
   "https://www.googleapis.com/auth/calendar",
+  "https://www.googleapis.com/auth/tasks",
 ];
 
 export const ZOOM_OAUTH_SCOPES = [
