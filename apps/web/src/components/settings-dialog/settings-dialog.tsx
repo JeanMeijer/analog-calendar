@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SlidersVertical, UsersRound } from "lucide-react";
+import { PaintBucket, SlidersVertical, UsersRound } from "lucide-react";
 
 import {
   Dialog,
@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accounts } from "./tabs/accounts";
 import { General } from "./tabs/general";
+import { ThemeCustomizer } from "./tabs/theme-customizer";
 
 interface SettingsDialogProps {
   children?: React.ReactNode;
@@ -43,6 +44,13 @@ export function SettingsDialog({ children }: SettingsDialogProps) {
               >
                 <UsersRound className="size-4" /> Accounts
               </TabsTrigger>
+
+              <TabsTrigger
+                value="customize"
+                className="w-full justify-start gap-3 border-none data-[state=active]:bg-muted data-[state=active]:shadow-none"
+              >
+                <PaintBucket className="size-4" /> Customize
+              </TabsTrigger>
             </TabsList>
             <Separator
               orientation="vertical"
@@ -55,6 +63,9 @@ export function SettingsDialog({ children }: SettingsDialogProps) {
                 </TabsContent>
                 <TabsContent value="general" className="mt-0 h-full">
                   <General />
+                </TabsContent>
+                <TabsContent value="customize" className="mt-0 h-full">
+                  <ThemeCustomizer />
                 </TabsContent>
               </div>
             </div>
