@@ -8,12 +8,14 @@ import { assignColor } from "./colors";
 import {
   parseGoogleCalendarCalendarListEntry,
   parseGoogleCalendarEvent,
+  parseGoogleCalendarFreeBusy,
   toGoogleCalendarAttendeeResponseStatus,
   toGoogleCalendarEvent,
 } from "./google-calendar/utils";
 import type {
   Calendar,
   CalendarEvent,
+  CalendarFreeBusy,
   CalendarProvider,
   ResponseToEventInput,
 } from "./interfaces";
@@ -265,6 +267,23 @@ export class GoogleCalendarProvider implements CalendarProvider {
         calendarId,
         sendUpdates: response.sendUpdate ? "all" : "none",
       });
+    });
+  }
+
+  async freeBusy(
+    calendars: string[],
+    timeMin: Temporal.ZonedDateTime,
+    timeMax: Temporal.ZonedDateTime,
+  ): Promise<CalendarFreeBusy[]> {
+    return this.withErrorHandler("freeBusy", async () => {
+      const response = await this.client.checkFreeBusy.checkFreeBusy({
+        timeMin: timeMin.withTimeZone("UTC").toInstant().toString(),
+        timeMax: timeMax.withTimeZone("UTC").toInstant().toString(),
+        timeZone: "UTC",
+        items: calendars.map((id) => ({ id })),
+      });
+
+      return parseGoogleCalendarFreeBusy(response);
     });
   }
 
