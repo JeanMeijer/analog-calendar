@@ -210,6 +210,37 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* tiptap editor */
+
+  .event-editor-content {
+    @apply w-full overflow-hidden;
+
+    /* prose mirror */
+    .ProseMirror {
+      @apply w-full min-w-max outline-none;
+    }
+
+    .mention {
+      @apply mr-0.5 rounded-sm px-1 py-0.5 text-sm font-medium;
+
+      &[data-id="mention-time"] {
+        @apply bg-green-500/10 text-green-500;
+      }
+
+      &[data-id="mention-duration"] {
+        @apply bg-orange-500/10 text-orange-500;
+      }
+
+      &[data-id="mention-date"] {
+        @apply bg-blue-500/10 text-blue-500;
+      }
+    }
+
+    p {
+      @apply leading-4;
+    }
+  }
 }
 
 @utility scrollbar-hidden {

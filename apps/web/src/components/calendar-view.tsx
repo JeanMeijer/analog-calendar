@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { useEdgeAutoScroll } from "./event-calendar/drag-and-drop/use-auto-scroll";
 import { type EventCollectionItem } from "./event-calendar/hooks/event-collection";
 import { useScrollToCurrentTime } from "./event-calendar/week-view/use-scroll-to-current-time";
+import { CreateEventInput } from "./create-event-input";
 
 interface CalendarContentProps {
   events: EventCollectionItem[];
@@ -175,6 +176,8 @@ export function CalendarView({
           headerRef={headerRef}
         />
       </div>
+      
+      <CreateEventInput />
       {/* <SignalView className="absolute bottom-8 left-1/2 -translate-x-1/2" /> */}
     </div>
   );
