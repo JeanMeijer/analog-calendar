@@ -64,6 +64,7 @@ export const events = pgTable(
     location: text("location"),
     status: text("status"),
     url: text("url"),
+    etag: text("etag"),
 
     syncToken: text("sync_token"),
 
