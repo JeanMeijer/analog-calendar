@@ -16,9 +16,13 @@ async function withAccessToken(account: Account, headers: Headers) {
     headers,
   });
 
+  if (!accessToken) {
+    throw new Error(`REAUTH:${account.providerId}`);
+  }
+
   return {
     ...account,
-    accessToken: accessToken ?? account.accessToken,
+    accessToken,
   };
 }
 
