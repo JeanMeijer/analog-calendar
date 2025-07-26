@@ -185,9 +185,17 @@ export class GoogleCalendarProvider implements CalendarProvider {
         };
       }
 
+      const options: NonNullable<
+        Parameters<typeof this.client.calendars.events.update>[2]
+      > = {};
+      if (event.etag) {
+        options.headers = { "If-Match": event.etag };
+      }
+
       const updatedEvent = await this.client.calendars.events.update(
         eventId,
         eventToUpdate,
+        options,
       );
 
       return parseGoogleCalendarEvent({
