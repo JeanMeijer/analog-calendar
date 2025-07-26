@@ -174,6 +174,8 @@ interface TimeInputProps {
   value: Temporal.ZonedDateTime;
   onChange: (value: Temporal.ZonedDateTime) => void;
   disabled?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function TimeInput({
@@ -182,6 +184,8 @@ export function TimeInput({
   value,
   onChange,
   disabled,
+  open,
+  onOpenChange,
 }: TimeInputProps) {
   const { use12Hour, locale } = useAtomValue(calendarSettingsAtom);
   const [input, setInput] = React.useState(
@@ -193,7 +197,9 @@ export function TimeInput({
     setInput(formatTime({ value, use12Hour, locale }));
   }, [value, use12Hour, locale]);
 
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
+  const isOpen = open !== undefined ? open : uncontrolledOpen;
+  const setIsOpen = onOpenChange ?? setUncontrolledOpen;
 
   const onComplete = React.useCallback(
     (newValue: string) => {
@@ -215,7 +221,7 @@ export function TimeInput({
       setInput(formatTime({ value: parsedZonedDateTime, use12Hour, locale }));
       setIsOpen(false);
     },
-    [use12Hour, locale, value, onChange],
+    [use12Hour, locale, value, onChange, setIsOpen],
   );
 
   const onInputChange = React.useCallback((newValue: string) => {

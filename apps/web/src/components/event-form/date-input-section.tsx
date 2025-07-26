@@ -20,6 +20,11 @@ export const DateInputSection = withForm({
     const isAllDayField = useField({ name: "isAllDay", form });
     const isSameTimezone =
       startField.state.value.timeZoneId === endField.state.value.timeZoneId;
+    const [isStartTimeOpen, setStartTimeOpen] = React.useState(false);
+    const [isEndTimeOpen, setIsEndTimeOpen] = React.useState(false);
+    const [openTimePicker, setOpenTimePicker] = React.useState<
+      "start" | "end" | null
+    >(null);
 
     const onTimezoneChange = React.useCallback(
       (value: string) => {
@@ -94,6 +99,16 @@ export const DateInputSection = withForm({
             id="start.time"
             className="col-span-2 col-start-1 h-8 border-none bg-transparent ps-8 shadow-none dark:bg-transparent"
             value={startField.state.value}
+            open={openTimePicker === "start"}
+            onOpenChange={(open) =>
+              setOpenTimePicker(
+                open
+                  ? "start"
+                  : openTimePicker === "start"
+                    ? null
+                    : openTimePicker,
+              )
+            }
             onChange={onStartChange}
             disabled={disabled}
           />
@@ -104,6 +119,12 @@ export const DateInputSection = withForm({
             id="end.time"
             className="col-span-2 col-start-3 h-8 border-none bg-transparent ps-8 shadow-none dark:bg-transparent"
             value={endField.state.value}
+            open={openTimePicker === "end"}
+            onOpenChange={(open) =>
+              setOpenTimePicker(
+                open ? "end" : openTimePicker === "end" ? null : openTimePicker,
+              )
+            }
             onChange={onEndChange}
             disabled={disabled}
           />
