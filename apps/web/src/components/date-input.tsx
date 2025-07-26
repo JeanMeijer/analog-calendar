@@ -162,7 +162,6 @@ export function DateInput({
             setOpen(true);
           }}
           onChange={(e) => onInputChange(e.target.value)}
-          onBlur={(e) => onInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key !== "Enter") {
               return;
