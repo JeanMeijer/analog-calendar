@@ -5,6 +5,7 @@ import { Temporal } from "temporal-polyfill";
 
 import { createDraftEvent } from "@/lib/utils/calendar";
 import { Action } from "./use-optimistic-events";
+import { useSelectedEvents } from "@/atoms";
 
 interface UseDragToCreateOptions {
   dispatchAction: (action: Action) => void;
@@ -36,6 +37,28 @@ export function useDragToCreate({
   const emptyImageRef = React.useRef<HTMLImageElement | null>(null);
   const isDragging = React.useRef(false);
   const dragCancelled = React.useRef(false);
+  const createdDraftId = React.useRef<string | null>(null);
+  const [isPreviewPersistent, setIsPreviewPersistent] = React.useState(false);
+  
+  // Track selected events to know when draft becomes real event
+  const { selectedEvent } = useSelectedEvents();
+
+  // Hide preview when the selected event is no longer a draft (i.e., it was saved)
+  React.useEffect(() => {
+    if (createdDraftId.current && selectedEvent) {
+      // If the selected event is not a draft and has the same ID, it means it was saved
+      if (!('type' in selectedEvent) || selectedEvent.type !== 'draft') {
+        if (selectedEvent.id === createdDraftId.current) {
+          // Event was saved, hide the preview
+          top.set(0);
+          height.set(0);
+          opacity.set(0);
+          createdDraftId.current = null;
+          setIsPreviewPersistent(false);
+        }
+      }
+    }
+  }, [selectedEvent, top, height, opacity]);
 
   // Create empty image on client side only to prevent globe icon on Mac Chrome
   React.useEffect(() => {
@@ -73,11 +96,18 @@ export function useDragToCreate({
   useHotkeys(
     "esc",
     () => {
-      if (isDragging.current) {
+      if (isDragging.current || createdDraftId.current) {
         dragCancelled.current = true;
         top.set(0);
         height.set(0);
         opacity.set(0);
+        setIsPreviewPersistent(false);
+        
+        // If we have a created draft, unselect it
+        if (createdDraftId.current) {
+          dispatchAction({ type: "unselect" });
+          createdDraftId.current = null;
+        }
       }
     },
     { scopes: ["calendar"] },
@@ -136,6 +166,7 @@ export function useDragToCreate({
 
     top.set(snappedTop);
     opacity.set(1);
+    setIsPreviewPersistent(false);
     // height.set(0);
   };
 
@@ -181,6 +212,7 @@ export function useDragToCreate({
       top.set(0);
       height.set(0);
       opacity.set(0);
+      setIsPreviewPersistent(false);
       return;
     }
 
@@ -210,9 +242,11 @@ export function useDragToCreate({
       allDay: false,
     });
 
-    top.set(0);
-    height.set(0);
-    opacity.set(0);
+    // Store the draft ID so we can track when it gets created
+    createdDraftId.current = draft.id;
+
+    // Keep the preview visible and mark it as persistent
+    setIsPreviewPersistent(true);
 
     dispatchAction({
       type: "draft",
@@ -220,5 +254,5 @@ export function useDragToCreate({
     });
   };
 
-  return { onDragStart, onDrag, onDragEnd, top, height, opacity };
+  return { onDragStart, onDrag, onDragEnd, top, height, opacity, isPreviewPersistent };
 }

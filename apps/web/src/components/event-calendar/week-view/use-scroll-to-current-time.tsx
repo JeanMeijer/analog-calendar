@@ -15,10 +15,13 @@ export function useScrollToCurrentTime({
       return;
     }
 
+    console.log("scrollToCurrentTime");
+
     const { hour, minute } = Temporal.Now.plainTimeISO();
     const top = hour * EventHeight + (minute * EventHeight) / 60;
 
     scrollContainerRef.current.scrollTo({
+      //Trying a
       top,
     });
   }, [scrollContainerRef]);

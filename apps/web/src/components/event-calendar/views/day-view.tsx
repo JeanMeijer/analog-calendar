@@ -206,7 +206,7 @@ function DayViewTimeSlots({
   const settings = useCalendarSettings();
   const columnRef = React.useRef<HTMLDivElement>(null);
 
-  const { onDragStart, onDrag, onDragEnd, top, height, opacity } =
+  const { onDragStart, onDrag, onDragEnd, top, height, opacity, isPreviewPersistent } =
     useDragToCreate({
       dispatchAction,
       date: currentDate,
@@ -237,7 +237,10 @@ function DayViewTimeSlots({
           />
         );
       })}
-      <DragPreview style={{ top, height, opacity }} />
+      <DragPreview 
+        style={{ top, height, opacity }} 
+        isPersistent={isPreviewPersistent}
+      />
     </motion.div>
   );
 }
